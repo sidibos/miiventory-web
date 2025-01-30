@@ -1,42 +1,46 @@
 import { Header } from "@/components/layout/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
-import { InventoryList } from "@/components/inventory/InventoryList";
-import { Package2, PackageOpen, Archive, BarChart2 } from "lucide-react";
+import { Tool, AlertTriangle, History, CheckCircle2 } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
-            title="Total Items"
-            value="1,234"
-            icon={Package2}
+            title="Total Tools"
+            value="156"
+            icon={Tool}
             trend={{ value: 12, isPositive: true }}
           />
           <StatsCard
-            title="Low Stock Items"
+            title="Active Alerts"
             value="8"
-            icon={PackageOpen}
+            icon={AlertTriangle}
             trend={{ value: 2, isPositive: false }}
           />
           <StatsCard
-            title="Categories"
+            title="Maintenance Due"
             value="12"
-            icon={Archive}
+            icon={History}
+            trend={{ value: 3, isPositive: false }}
           />
           <StatsCard
-            title="Total Value"
-            value="$45,678"
-            icon={BarChart2}
-            trend={{ value: 8, isPositive: true }}
+            title="Available Tools"
+            value="134"
+            icon={CheckCircle2}
+            trend={{ value: 5, isPositive: true }}
           />
         </div>
         
         <div className="mt-8">
-          <h2 className="mb-6 text-2xl font-semibold text-gray-900">Inventory Items</h2>
-          <InventoryList />
+          <h2 className="mb-6 text-2xl font-semibold">Recent Activity</h2>
+          <div className="rounded-lg border bg-card">
+            <div className="p-6">
+              <p className="text-muted-foreground">No recent activity to display.</p>
+            </div>
+          </div>
         </div>
       </main>
     </div>

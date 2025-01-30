@@ -1,4 +1,4 @@
-import { Package2, Boxes, BarChart2, Settings, Users } from "lucide-react";
+import { Tool, BarChart2, Settings, Users, History, AlertTriangle } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,8 +17,8 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Package2 className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">Warehouse Manager</h1>
+            <Tool className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-semibold">Tools Monitor</h1>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -33,44 +33,44 @@ export const Header = () => {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>
-                    <Boxes className="mr-2 h-4 w-4" />
-                    Inventory
+                    <Tool className="mr-2 h-4 w-4" />
+                    Tools
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                       <li className="row-span-3">
                         <Link
-                          to="/inventory"
+                          to="/tools"
                           className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                         >
-                          <Boxes className="h-6 w-6" />
+                          <Tool className="h-6 w-6" />
                           <div className="mb-2 mt-4 text-lg font-medium">
-                            Inventory Management
+                            Tools Management
                           </div>
                           <p className="text-sm leading-tight text-muted-foreground">
-                            Manage your warehouse inventory, track stock levels, and handle item categories.
+                            Monitor and manage your tools inventory, track maintenance status, and handle assignments.
                           </p>
                         </Link>
                       </li>
                       <li>
                         <Link
-                          to="/categories"
+                          to="/maintenance"
                           className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                         >
-                          <div className="text-sm font-medium leading-none">Categories</div>
+                          <div className="text-sm font-medium leading-none">Maintenance</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Manage product categories and subcategories
+                            Schedule and track tool maintenance
                           </p>
                         </Link>
                       </li>
                       <li>
                         <Link
-                          to="/stock-levels"
+                          to="/alerts"
                           className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                         >
-                          <div className="text-sm font-medium leading-none">Stock Levels</div>
+                          <div className="text-sm font-medium leading-none">Alerts</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Monitor and update inventory stock levels
+                            View and manage tool alerts and notifications
                           </p>
                         </Link>
                       </li>
@@ -79,16 +79,16 @@ export const Header = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <Link to="/settings" className={navigationMenuTriggerStyle()}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
+                  <Link to="/history" className={navigationMenuTriggerStyle()}>
+                    <History className="mr-2 h-4 w-4" />
+                    History
                   </Link>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <Link to="/users" className={navigationMenuTriggerStyle()}>
-                    <Users className="mr-2 h-4 w-4" />
-                    Users
+                  <Link to="/settings" className={navigationMenuTriggerStyle()}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
                   </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
