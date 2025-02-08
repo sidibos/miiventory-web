@@ -1,6 +1,7 @@
+
 import { Header } from "@/components/layout/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
-import { tool, AlertTriangle, History, CheckCircle2 } from "lucide-react";
+import { Tool, AlertTriangle, History, CheckCircle2 } from "lucide-react";
 
 const Index = () => {
   return (
@@ -11,7 +12,7 @@ const Index = () => {
           <StatsCard
             title="Total Tools"
             value="156"
-            icon={tool}
+            icon={Tool}
             trend={{ value: 12, isPositive: true }}
           />
           <StatsCard

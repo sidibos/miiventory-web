@@ -1,4 +1,5 @@
-import { tool, BarChart2, Settings, Users, History, AlertTriangle } from "lucide-react";
+
+import { Tool, BarChart2, Settings, Users, History, AlertTriangle } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,7 +18,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <tool className="h-6 w-6 text-primary" />
+            <Tool className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">Tools Monitor</h1>
           </div>
 
@@ -33,7 +34,7 @@ export const Header = () => {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>
-                    <tool className="mr-2 h-4 w-4" />
+                    <Tool className="mr-2 h-4 w-4" />
                     Tools
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
@@ -43,7 +44,7 @@ export const Header = () => {
                           to="/tools"
                           className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                         >
-                          <tool className="h-6 w-6" />
+                          <Tool className="h-6 w-6" />
                           <div className="mb-2 mt-4 text-lg font-medium">
                             Tools Management
                           </div>
