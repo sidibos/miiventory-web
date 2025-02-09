@@ -1,4 +1,11 @@
-import { Package2, Boxes, BarChart2, Settings, Users } from "lucide-react";
+import { 
+  Package2, 
+  Boxes, 
+  BarChart2, 
+  Settings, 
+  Users,
+  List
+} from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,7 +25,7 @@ export const Header = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Package2 className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">Warehouse Manager</h1>
+            <h1 className="text-xl font-semibold">Miinventory Manager</h1>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -54,7 +61,7 @@ export const Header = () => {
                       </li>
                       <li>
                         <Link
-                          to="/categories"
+                          to="/category"
                           className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                         >
                           <div className="text-sm font-medium leading-none">Categories</div>
@@ -89,6 +96,12 @@ export const Header = () => {
                   <Link to="/users" className={navigationMenuTriggerStyle()}>
                     <Users className="mr-2 h-4 w-4" />
                     Users
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/category" className={navigationMenuTriggerStyle()}>
+                    <List className="mr-2 h-4 w-4" />
+                    Categories
                   </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
