@@ -40,12 +40,12 @@ export const Header = () => {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>
-                    <Boxes className="mr-2 h-4 w-4" />
+                    <Boxes className="mr-2 h-8 w-4" />
                     Inventory
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                      <li className="row-span-3">
+                      <li className="row-span-4 p-3">
                         <Link
                           to="/inventory"
                           className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
@@ -61,12 +61,23 @@ export const Header = () => {
                       </li>
                       <li>
                         <Link
-                          to="/category"
+                          to="/categories"
                           className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                         >
                           <div className="text-sm font-medium leading-none">Categories</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                             Manage product categories and subcategories
+                          </p>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/products"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Products</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Manage Products
                           </p>
                         </Link>
                       </li>
@@ -81,15 +92,98 @@ export const Header = () => {
                           </p>
                         </Link>
                       </li>
+                      <li>
+                        <Link
+                          to="/warehouses"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Warehouses</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Manage warehouses
+                          </p>
+                        </Link>
+                      </li>
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <Link to="/settings" className={navigationMenuTriggerStyle()}>
+                  <Link to="/suppliers" className={navigationMenuTriggerStyle()}>
                     <Settings className="mr-2 h-4 w-4" />
-                    Settings
+                    Suppliers
                   </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <Link to="/reports" className={navigationMenuTriggerStyle()}>
+                    <BarChart2 className="mr-2 h-4 w-4" />
+                    Reports
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <Link to="/customers" className={navigationMenuTriggerStyle()}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Customers
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>
+                    <Boxes className="mr-2 h-4 w-4" />
+                    Orders
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                      <li className="row-span-3">
+                        <Link
+                          to="/orders"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                        >
+                          <Boxes className="h-6 w-6" />
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Orders Management
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Manage orders
+                          </p>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/purchase-orders"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Purchase Orders</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Manage product categories and subcategories
+                          </p>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/sales-orders"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Sales Orders</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Sales Orders
+                          </p>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/transfer-orders"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Transfer Orders</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Transfer Orders
+                          </p>
+                        </Link>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
@@ -98,10 +192,11 @@ export const Header = () => {
                     Users
                   </Link>
                 </NavigationMenuItem>
+
                 <NavigationMenuItem>
-                  <Link to="/category" className={navigationMenuTriggerStyle()}>
-                    <List className="mr-2 h-4 w-4" />
-                    Categories
+                  <Link to="/settings" className={navigationMenuTriggerStyle()}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
                   </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>

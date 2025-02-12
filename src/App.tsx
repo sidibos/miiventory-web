@@ -25,7 +25,15 @@ const App = () => (
             <Route path="/users" element={<Users />} />
             <Route path="users/:email" element={<UserProfile />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/category" element={<CategoryList />} />
+            <Route path="/categories" element={<CategoryList />} />
+            <Route path="/customers" element={<NotFound />} />
+            <Route path="/products" element={<NotFound />} />
+            <Route path="/suppliers" element={<NotFound />} />
+            <Route path="/orders" element={<NotFound />} />
+            <Route path="/sales-orders" element={<NotFound />} />
+            <Route path="/purchase-orders" element={<NotFound />} />
+            <Route path="/transfer-orders" element={<NotFound />} />
+            <Route path="/reports" element={<NotFound />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
