@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 interface User {
     name: string;
     email: string;
+    id: string;
     age: number;
     status: string;
     avatar?: string;
@@ -29,6 +30,7 @@ interface User {
 
 const defaultNewUser: User = {
     name: '',
+    id:'',
     email: '',
     age: 0,
     status: 'Active'
@@ -83,7 +85,7 @@ export const UserList = () => {
 
         try {
             const response = await axios.put(
-                `${config.apiURL}/users/update?email=${encodeURI(selectedUser.email)}`, 
+                `${config.apiURL}/users/${selectedUser.id}}` + '/', 
                 editForm
             );
 
@@ -95,6 +97,7 @@ export const UserList = () => {
                 title: "Success",
                 description: "Profile updated successfully",
             });
+            fetchUsers();
         } catch (error) {
             console.error('Error updating user:', error);
             toast({
@@ -108,7 +111,7 @@ export const UserList = () => {
     
     const handleCreateUser = async () => {
         try {
-            await axios.post<User>(`${config.apiURL}/users/create`, newUser);
+            await axios.post<User>(`${config.apiURL}/users/`, newUser);
             await fetchUsers();
 
             setIsCreating(false);
@@ -174,7 +177,7 @@ return (
                 </TableCell>
                 <TableCell>
                     <div className="flex space-x-2">
-                        <Link to={`/users/${user.email}`} className="text-blue-600 hover:underline">View</Link>
+                        <Link to={`/users/${user.id}`} className="text-blue-600 hover:underline">View</Link>
                         <Button
                             variant="ghost"
                             size="sm"

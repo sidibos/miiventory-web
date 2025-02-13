@@ -39,6 +39,13 @@ export const Header = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
+                  <Link to="/reports" className={navigationMenuTriggerStyle()}>
+                    <BarChart2 className="mr-2 h-4 w-4" />
+                    Reports
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
                   <NavigationMenuTrigger>
                     <Boxes className="mr-2 h-8 w-4" />
                     Inventory
@@ -111,13 +118,6 @@ export const Header = () => {
                   <Link to="/suppliers" className={navigationMenuTriggerStyle()}>
                     <Settings className="mr-2 h-4 w-4" />
                     Suppliers
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/reports" className={navigationMenuTriggerStyle()}>
-                    <BarChart2 className="mr-2 h-4 w-4" />
-                    Reports
                   </Link>
                 </NavigationMenuItem>
 
