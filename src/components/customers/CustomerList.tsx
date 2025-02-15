@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import config from '@/config';
-import { Eye, Edit, Plus, Mail, Phone } from 'lucide-react';
+import { Eye, Edit, Plus, Mail, Phone, Trash } from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -16,11 +16,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Customer {
     id: string;
     name: string;
-    email: string;
+    contact_email: string;
     phone: string;
     address: string;
     company_name: string;
@@ -31,7 +41,7 @@ interface Customer {
 const defaultCustomer: Customer = {
     id: '',
     name: '',
-    email: '',
+    contact_email: '',
     phone: '',
     address: '',
     company_name: '',
@@ -46,6 +56,7 @@ export const CustomerList = () => {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editForm, setEditForm] = useState<Customer>(defaultCustomer);
     const [newCustomer, setNewCustomer] = useState<Customer>(defaultCustomer);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const { toast } = useToast();
 
     const fetchCustomers = async () => {
@@ -88,6 +99,11 @@ export const CustomerList = () => {
         }
     };
 
+    const handleDeleteClick = (customer: Customer) => {
+        setSelectedCustomer(customer);
+        setIsDeleteDialogOpen(true);
+    };
+
     const handleUpdateCustomer = async () => {
         try {
             await axios.put(`${config.apiURL}/customers/${editForm.id}/`, editForm);
@@ -127,6 +143,27 @@ export const CustomerList = () => {
         }
     };
 
+    const handleDeleteCustomer = async () => {
+        if (!selectedCustomer) return;
+
+        try {
+            await axios.delete(`${config.apiURL}/customers/${selectedCustomer.id}/`);
+            await fetchCustomers();
+            setIsDeleteDialogOpen(false);
+            toast({
+                title: "Success",
+                description: "Customer deleted successfully",
+            });
+        } catch (error) {
+            console.error('Error deleting customer:', error);
+            toast({
+                title: "Error",
+                description: "Failed to delete supplier",
+                variant: "destructive",
+            });
+        }
+    };
+
     return (
         <div className="rounded-lg border bg-card">
             <div className="p-4">
@@ -157,7 +194,7 @@ export const CustomerList = () => {
                                 </Avatar>
                                 <div className="font-medium">{customer.name}</div>
                             </TableCell>
-                            <TableCell>{customer.email}</TableCell>
+                            <TableCell>{customer.contact_email}</TableCell>
                             <TableCell>{customer.phone}</TableCell>
                             <TableCell>{customer.company_name}</TableCell>
                             <TableCell>
@@ -184,6 +221,13 @@ export const CustomerList = () => {
                                         onClick={() => handleEditClick(customer)}
                                     >
                                         <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDeleteClick(customer)}
+                                    >
+                                        <Trash className="h-4 w-4 text-red-500" />
                                     </Button>
                                 </div>
                             </TableCell>
@@ -212,7 +256,7 @@ export const CustomerList = () => {
                         <div className="grid gap-4">
                             <div className="flex items-center space-x-2">
                                 <Mail className="h-4 w-4 text-gray-500" />
-                                <span>{selectedCustomer?.email}</span>
+                                <span>{selectedCustomer?.contact_email}</span>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <Phone className="h-4 w-4 text-gray-500" />
@@ -247,9 +291,9 @@ export const CustomerList = () => {
                             <Label htmlFor="edit-email">Email</Label>
                             <Input
                                 id="edit-email"
-                                name="email"
+                                name="contact_email"
                                 type="email"
-                                value={editForm.email}
+                                value={editForm.contact_email}
                                 onChange={(e) => handleInputChange(e, 'edit')}
                             />
                         </div>
@@ -312,9 +356,9 @@ export const CustomerList = () => {
                             <Label htmlFor="new-email">Email</Label>
                             <Input
                                 id="new-email"
-                                name="email"
+                                name="contact_email"
                                 type="email"
-                                value={newCustomer.email}
+                                value={newCustomer.contact_email}
                                 onChange={(e) => handleInputChange(e, 'new')}
                             />
                         </div>
@@ -362,6 +406,24 @@ export const CustomerList = () => {
                     </div>
                 </DialogContent>
             </Dialog>
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the customer
+                            and remove their data from our servers.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteCustomer} className="bg-red-500 hover:bg-red-600">
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };
