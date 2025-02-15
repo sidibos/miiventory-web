@@ -9,6 +9,7 @@ import Settings from "./pages/Settings";
 import Users from "./pages/Users";
 import UserProfile from "./pages/UserProfile";
 import CategoryList from "./pages/CategoryList";
+import Customers from "./pages/Customers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +27,7 @@ const App = () => (
             <Route path="users/:email" element={<UserProfile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/categories" element={<CategoryList />} />
-            <Route path="/customers" element={<NotFound />} />
+            <Route path="/customers" element={<Customers />} />
             <Route path="/products" element={<NotFound />} />
             <Route path="/suppliers" element={<NotFound />} />
             <Route path="/orders" element={<NotFound />} />
