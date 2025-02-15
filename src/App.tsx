@@ -10,6 +10,7 @@ import Users from "./pages/Users";
 import UserProfile from "./pages/UserProfile";
 import CategoryList from "./pages/CategoryList";
 import Customers from "./pages/Customers";
+import Suppliers from "./pages/Suppliers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,7 @@ const App = () => (
             <Route path="/categories" element={<CategoryList />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/products" element={<NotFound />} />
-            <Route path="/suppliers" element={<NotFound />} />
+            <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/orders" element={<NotFound />} />
             <Route path="/sales-orders" element={<NotFound />} />
             <Route path="/purchase-orders" element={<NotFound />} />
