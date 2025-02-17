@@ -14,6 +14,8 @@ import Suppliers from "./pages/Suppliers";
 import Products from "./pages/Products";
 import SalesOrderList from "./pages/SalesOrdersList";
 import AddSalesOrder from "./pages/AddSalesOrder";
+import PurchaseOrders from "./pages/PurchaseOrders";
+import AddPurchaseOrder from "./pages/AddPurchaseOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,7 +39,8 @@ const App = () => (
             <Route path="/orders" element={<NotFound />} />
             <Route path="/sales-orders" element={<SalesOrderList />} />
             <Route path="/sales-orders/add" element={<AddSalesOrder />} />
-            <Route path="/purchase-orders" element={<NotFound />} />
+            <Route path="/purchase-orders" element={<PurchaseOrders />} />
+            <Route path="/purchase-orders/add" element={<AddPurchaseOrder />} />
             <Route path="/transfer-orders" element={<NotFound />} />
             <Route path="/reports" element={<NotFound />} />
             <Route path="*" element={<NotFound />} />

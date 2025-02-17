@@ -109,7 +109,7 @@ export const SalesOrderList = () => {
             );
             setSalesOrders(response.data.data);
             let totalPages = Math.ceil(response.data.total / ITEMS_PER_PAGE) || 1;
-            setTotalPages(Math.ceil(response.data.total / ITEMS_PER_PAGE));
+            setTotalPages(totalPages);
         } catch (error) {
             console.error('Error fetching sales orders:', error);
             toast({
