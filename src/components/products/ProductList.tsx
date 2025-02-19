@@ -6,6 +6,29 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Upload } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import config from "@/config";
+
+// Interfaces
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Supplier {
+  id: string;
+  name: string;
+  company_name: string;
+}
 
 // Mock data for initial version
 const mockProducts = [
@@ -21,10 +44,29 @@ export const ProductList = () => {
     name: "",
     price: "",
     category: "",
+    supplier: "",
     sku: "",
     image: null as File | null,
   });
   const { toast } = useToast();
+
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await axios.get<Category[]>(`${config.apiURL}/categories/`);
+      return response.data;
+    }
+  });
+
+  // Fetch suppliers
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['suppliers'],
+    queryFn: async () => {
+      const response = await axios.get<Supplier[]>(`${config.apiURL}/suppliers/`);
+      return response.data;
+    }
+  });
 
   const filteredProducts = mockProducts.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -39,7 +81,6 @@ export const ProductList = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle the form submission with the image
     console.log("New product with image:", newProduct);
     toast({
       title: "Success",
@@ -50,6 +91,7 @@ export const ProductList = () => {
       name: "",
       price: "",
       category: "",
+      supplier: "",
       sku: "",
       image: null,
     });
@@ -101,12 +143,39 @@ export const ProductList = () => {
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
+                <Select 
                   value={newProduct.category}
-                  onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                  required
-                />
+                  onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="supplier">Supplier</Label>
+                <Select 
+                  value={newProduct.supplier}
+                  onValueChange={(value) => setNewProduct({ ...newProduct, supplier: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a supplier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id}>
+                        {supplier.name} - {supplier.company_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="sku">SKU</Label>
