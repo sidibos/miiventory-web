@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
     Table,
@@ -30,14 +31,14 @@ const fetchPurchaseOrders = async (): Promise<PurchaseOrder[]> => {
 };
 
 const PurchaseOrderList = () => {
-    const { data: orders, isLoading, error } = useQuery({
+    const { data: orders = [], isLoading, error } = useQuery<PurchaseOrder[]>({
         queryKey: ['purchase-orders'],
         queryFn: fetchPurchaseOrders
     });
 
     const [searchTerm, setSearchTerm] = useState("");
 
-    const filteredOrders = orders?.filter(order =>
+    const filteredOrders = orders.filter(order =>
         order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.supplier.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -70,7 +71,7 @@ const PurchaseOrderList = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredOrders?.map(order => (
+                        {filteredOrders.map(order => (
                             <TableRow key={order.id}>
                                 <TableCell>{order.orderNumber}</TableCell>
                                 <TableCell>{order.supplier}</TableCell>

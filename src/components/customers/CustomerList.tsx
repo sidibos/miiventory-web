@@ -140,6 +140,7 @@ export const CustomerList = ({ customers = mockCustomers }: CustomerListProps) =
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
   const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
+  const { toast } = useToast();
 
   const filteredCustomers = customers.filter((customer) =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
