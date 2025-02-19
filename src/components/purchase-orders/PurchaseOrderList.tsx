@@ -26,16 +26,17 @@ interface PurchaseOrder {
 }
 
 const fetchPurchaseOrders = async (): Promise<PurchaseOrder[]> => {
-    const response = await axios.get(`${config.apiURL}/purchase-orders${config.slash}`);
+    const response = await axios.get<PurchaseOrder[]>(`${config.apiURL}/purchase-orders${config.slash}`);
     return response.data;
 };
 
 const PurchaseOrderList = () => {
-    const { data: orders = [], isLoading, error } = useQuery<PurchaseOrder[], Error>({
+    const { data, isLoading, error } = useQuery({
         queryKey: ['purchase-orders'],
         queryFn: fetchPurchaseOrders
     });
 
+    const orders = data ?? [];
     const [searchTerm, setSearchTerm] = useState("");
 
     const filteredOrders = orders.filter(order =>
@@ -44,7 +45,7 @@ const PurchaseOrderList = () => {
     );
 
     if (isLoading) return <div>Loading purchase orders...</div>;
-    if (error) return <div>Error: {error.message}</div>;
+    if (error) return <div>Error: {error instanceof Error ? error.message : 'Unknown error'}</div>;
 
     return (
         <div className="space-y-4">
