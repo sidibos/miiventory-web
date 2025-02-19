@@ -89,17 +89,6 @@ export const Header = () => {
                           </p>
                         </Link>
                       </li>
-                      <li>
-                        <Link
-                          to="/stock-levels"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Stock Levels</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Monitor and update inventory stock levels
-                          </p>
-                        </Link>
-                      </li>
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -144,17 +133,6 @@ export const Header = () => {
                           <div className="text-sm font-medium leading-none">Purchase Orders</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                             Manage purchase orders
-                          </p>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/transfer-orders"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Transfer Orders</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Manage transfer orders
                           </p>
                         </Link>
                       </li>
