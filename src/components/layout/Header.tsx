@@ -48,7 +48,7 @@ export const Header = () => {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>
-                    <Boxes className="mr-2 h-8 w-4" />
+                    <Boxes className="mr-2 h-4 w-4" />
                     Inventory
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>

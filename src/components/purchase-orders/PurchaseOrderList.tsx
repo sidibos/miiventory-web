@@ -31,7 +31,7 @@ const fetchPurchaseOrders = async (): Promise<PurchaseOrder[]> => {
 };
 
 const PurchaseOrderList = () => {
-    const { data: orders = [], isLoading, error } = useQuery<PurchaseOrder[]>({
+    const { data: orders = [], isLoading, error } = useQuery<PurchaseOrder[], Error>({
         queryKey: ['purchase-orders'],
         queryFn: fetchPurchaseOrders
     });
