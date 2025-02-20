@@ -47,7 +47,7 @@ export const UserList = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get<User[]>(config.apiURL + '/users');
+            const response = await axios.get<User[]>(config.apiURL + '/users/');
             setUsers(response.data);
         } catch (error) {
             console.error('Error fetching users:', error);
