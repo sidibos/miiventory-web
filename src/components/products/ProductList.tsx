@@ -30,6 +30,7 @@ import {
 import { Supplier } from '@/types/supplier';
 import { Category } from '@/types/category';
 
+const ITEMS_PER_PAGE = 10;
 
 interface Product {
     id: string;
