@@ -5,7 +5,8 @@ import {
   BarChart2, 
   Settings, 
   Users,
-  List
+  List,
+  LogOut
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -18,8 +19,20 @@ import {
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Button } from "@/components/ui/button";
 
 export const Header = () => {
+  const { logout } = useAuth0();
+
+  const handleLogout = () => {
+    logout({
+      logoutParams: {
+        returnTo: window.location.origin
+      }
+    });
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container mx-auto px-4 py-3">
@@ -156,6 +169,15 @@ export const Header = () => {
               </NavigationMenuList>
             </NavigationMenu>
             <ThemeToggle />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleLogout}
+              className="gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>
