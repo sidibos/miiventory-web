@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { AuthGuard } from "@/components/auth/AuthGuard";
-import Login from "@/pages/Login";
+import { Login } from "@/pages/Login";
 import Index from "./pages/Index";
 import Settings from "./pages/Settings";
 import Users from "./pages/Users";

@@ -30,16 +30,46 @@ interface Supplier {
   company_name: string;
 }
 
+interface Product {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    price: number;
+    sku: string;
+    stock: number;
+    min_stock: number;
+    selling_price: number;
+    supplier: string;
+    category: string;
+    status: 'active' | 'inactive' | 'pending';
+    image:  File | null;
+}
+
+const defaultProduct: Product = {
+    id: '',
+    name: '',
+    slug: '',
+    description: '',
+    price: 0,
+    sku: '',
+    stock: 0,
+    min_stock: 0,
+    selling_price: 0,
+    supplier: '',
+    category: '',
+    status: 'pending',
+    image: null
+};
+
+const ITEMS_PER_PAGE = 10;
+
 export const ProductForm = () => {
   const navigate = useNavigate();
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    category: "",
-    supplier: "",
-    sku: "",
-    image: null as File | null,
-  });
+  const [newProduct, setNewProduct] = useState<Product>(defaultProduct);
+  const [totalPages, setTotalPages] = useState(1);
+  //const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  //const [categories, setCategories] = useState<Category[]>([]);
   const { toast } = useToast();
 
   const { data: categories = [] } = useQuery({
@@ -57,7 +87,6 @@ export const ProductForm = () => {
       return response.data;
     }
   });
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -65,15 +94,36 @@ export const ProductForm = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+//   const handleSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     console.log("New product with image:", newProduct);
+//     toast({
+//       title: "Success",
+//       description: "Product added successfully",
+//     });
+    
+//     navigate("/products");
+//   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("New product with image:", newProduct);
-    toast({
-      title: "Success",
-      description: "Product added successfully",
-    });
-    navigate("/products");
-  };
+    try {
+        await axios.post(`${config.apiURL}/products/`, newProduct);
+        setNewProduct(defaultProduct);
+        toast({
+            title: "Success",
+            description: "Product created successfully",
+        });
+        navigate("/products");
+    } catch (error) {
+        console.error('Error creating product:', error);
+        toast({
+            title: "Error",
+            description: "Failed to create product",
+            variant: "destructive",
+        });
+    }
+ };
 
   return (
     <Card className="max-w-2xl mx-auto">
@@ -88,6 +138,27 @@ export const ProductForm = () => {
               required
             />
           </div>
+
+           <div>
+                <Label htmlFor="edit-name">Slug</Label>
+                <Input
+                id="add-slug"
+                name="slug"
+                value={newProduct.slug}
+                onChange={(e) => setNewProduct({ ...newProduct, slug: e.target.value })}
+                />
+            </div>
+          
+            <div>
+                <Label htmlFor="description">Description</Label>
+                <Input
+                id="description"
+                value={newProduct.description}
+                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                required
+                />
+          </div>
+
           <div>
             <Label htmlFor="price">Price</Label>
             <Input
@@ -95,7 +166,7 @@ export const ProductForm = () => {
               type="number"
               step="0.01"
               value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+              onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
               required
             />
           </div>

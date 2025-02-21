@@ -1,8 +1,7 @@
-
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Login from "@/pages/Login";
+import { Login } from "@/pages/Login";
 
 export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth0();

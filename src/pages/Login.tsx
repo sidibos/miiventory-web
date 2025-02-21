@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
-const Login = () => {
+export const Login = () => {
   const { loginWithPopup, isLoading, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
 
@@ -84,4 +84,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+//export default Login;
