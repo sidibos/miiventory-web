@@ -1,10 +1,12 @@
+
 import { 
   Package2, 
   Boxes, 
   BarChart2, 
   Settings, 
   Users,
-  List
+  List,
+  LogOut
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -17,8 +19,20 @@ import {
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Button } from "@/components/ui/button";
 
 export const Header = () => {
+  const { logout } = useAuth0();
+
+  const handleLogout = () => {
+    logout({
+      logoutParams: {
+        returnTo: window.location.origin
+      }
+    });
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container mx-auto px-4 py-3">
@@ -47,7 +61,7 @@ export const Header = () => {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>
-                    <Boxes className="mr-2 h-8 w-4" />
+                    <Boxes className="mr-2 h-4 w-4" />
                     Inventory
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
@@ -88,28 +102,6 @@ export const Header = () => {
                           </p>
                         </Link>
                       </li>
-                      <li>
-                        <Link
-                          to="/stock-levels"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Stock Levels</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Monitor and update inventory stock levels
-                          </p>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/warehouses"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Warehouses</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Manage warehouses
-                          </p>
-                        </Link>
-                      </li>
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -130,22 +122,19 @@ export const Header = () => {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>
-                    <Boxes className="mr-2 h-4 w-4" />
+                    <List className="mr-2 h-4 w-4" />
                     Orders
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-3 p-4 pr-12 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                      <li className="row-span-3 p-3">
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-1 lg:w-[300px]">
+                      <li>
                         <Link
-                          to="/orders"
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          to="/sales-orders"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                         >
-                          <Boxes className="h-6 w-6" />
-                          <div className="mb-2 mt-4 text-lg font-medium">
-                            Orders Management
-                          </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
-                            Manage orders
+                          <div className="text-sm font-medium leading-none">Sales Orders</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Manage sales orders
                           </p>
                         </Link>
                       </li>
@@ -156,29 +145,7 @@ export const Header = () => {
                         >
                           <div className="text-sm font-medium leading-none">Purchase Orders</div>
                           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Manage product categories and subcategories
-                          </p>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/sales-orders"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Sales Orders</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Sales Orders
-                          </p>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/transfer-orders"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Transfer Orders</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Transfer Orders
+                            Manage purchase orders
                           </p>
                         </Link>
                       </li>
@@ -192,16 +159,18 @@ export const Header = () => {
                     Users
                   </Link>
                 </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/settings" className={navigationMenuTriggerStyle()}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
-                </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
             <ThemeToggle />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleLogout}
+              className="gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>

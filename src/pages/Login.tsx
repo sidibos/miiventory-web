@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import config from '@/config';
+
+console.log(import.meta.env.VITE_API_URL)
 
 export const Login = () => {
   const { loginWithPopup, isLoading, isAuthenticated } = useAuth0();
@@ -14,6 +17,7 @@ export const Login = () => {
       navigate("/");
     }
   }, [isAuthenticated, navigate]);
+
 
   const handleLogin = async () => {
     try {
