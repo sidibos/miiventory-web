@@ -63,7 +63,12 @@ const defaultProduct: Product = {
     image: null
 };
 
-const ITEMS_PER_PAGE = 10;
+// Mock data for initial version
+const mockProducts = [
+  { id: 1, name: "Laptop", price: 999.99, category: "Electronics", sku: "LAP001", image: "" },
+  { id: 2, name: "Office Chair", price: 199.99, category: "Furniture", sku: "CHR001", image: "" },
+  { id: 3, name: "Notebook", price: 4.99, category: "Stationery", sku: "NB001", image: "" },
+];
 
 export const ProductList = () => {
     const navigate = useNavigate();
@@ -258,6 +263,7 @@ export const ProductList = () => {
                     </Button>
                 </div>
               {/* <Button variant="outline" size="sm">
+              
                 Edit
               </Button>
               <Button variant="destructive" size="sm">

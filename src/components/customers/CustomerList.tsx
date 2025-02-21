@@ -1,429 +1,355 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import config from '@/config';
-import { Eye, Edit, Plus, Mail, Phone, Trash } from 'lucide-react';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Search, Plus, Edit, Trash2 } from "lucide-react";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Customer {
-    id: string;
-    name: string;
-    contact_email: string;
-    phone: string;
-    address: string;
-    company_name: string;
-    status: 'active' | 'inactive';
-    //avatar?: string;
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  company: string;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+  status: 'active' | 'inactive' | 'pending';
 }
 
+const mockCustomers: Customer[] = [
+  {
+    id: "1",
+    name: "John Doe",
+    email: "john.doe@example.com",
+    phone: "123-456-7890",
+    address: "123 Main St",
+    company: "Acme Corp",
+    notes: "Regular customer",
+    created_at: "2023-01-01",
+    updated_at: "2023-01-01",
+    status: 'active',
+  },
+  {
+    id: "2",
+    name: "Jane Smith",
+    email: "jane.smith@example.com",
+    phone: "987-654-3210",
+    address: "456 Elm St",
+    company: "Beta Inc",
+    notes: "New customer",
+    created_at: "2023-02-15",
+    updated_at: "2023-02-15",
+    status: 'inactive',
+  },
+  {
+    id: "3",
+    name: "Alice Johnson",
+    email: "alice.johnson@example.com",
+    phone: "555-123-4567",
+    address: "789 Oak St",
+    company: "Gamma Ltd",
+    notes: "VIP customer",
+    created_at: "2023-03-20",
+    updated_at: "2023-03-20",
+    status: 'pending',
+  },
+];
+
 const defaultCustomer: Customer = {
-    id: '',
-    name: '',
-    contact_email: '',
-    phone: '',
-    address: '',
-    company_name: '',
-    status: 'active'
+  id: '',
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  company: '',
+  notes: '',
+  created_at: '',
+  updated_at: '',
+  status: 'active'
 };
 
-export const CustomerList = () => {
-    const [customers, setCustomers] = useState<Customer[]>([]);
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-    const [isViewOpen, setIsViewOpen] = useState(false);
-    const [isEditOpen, setIsEditOpen] = useState(false);
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [editForm, setEditForm] = useState<Customer>(defaultCustomer);
-    const [newCustomer, setNewCustomer] = useState<Customer>(defaultCustomer);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const { toast } = useToast();
+const customerSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Invalid email address.",
+  }),
+  phone: z.string().min(10, {
+    message: "Phone number must be at least 10 digits.",
+  }),
+  address: z.string().min(5, {
+    message: "Address must be at least 5 characters.",
+  }),
+  company: z.string().optional(),
+  notes: z.string().optional(),
+  status: z.enum(['active', 'inactive', 'pending']),
+});
 
-    const fetchCustomers = async () => {
-        try {
-            const response = await axios.get<Customer[]>(`${config.apiURL}/customers/`);
-            setCustomers(response.data);
-        } catch (error) {
-            console.error('Error fetching customers:', error);
-            toast({
-                title: "Error",
-                description: "Failed to fetch customers",
-                variant: "destructive",
-            });
-        }
-    };
+interface CustomerListProps {
+  customers?: Customer[];
+}
 
-    useEffect(() => {
-        fetchCustomers();
-    }, []);
+export const CustomerList = ({ customers = mockCustomers }: CustomerListProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [open, setOpen] = useState(false);
+  const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
+  const { toast } = useToast();
 
-    const handleEditClick = (customer: Customer) => {
-        setEditForm(customer);
-        setIsEditOpen(true);
-    };
+  const filteredCustomers = customers.filter((customer) =>
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    const handleViewClick = (customer: Customer) => {
-        setSelectedCustomer(customer);
-        setIsViewOpen(true);
-    };
+  const form = useForm<z.infer<typeof customerSchema>>({
+    resolver: zodResolver(customerSchema),
+    defaultValues: editCustomer || defaultCustomer,
+    mode: "onChange"
+  });
 
-    const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement>,
-        form: 'edit' | 'new'
-    ) => {
-        const { name, value } = e.target;
-        if (form === 'edit') {
-            setEditForm(prev => ({ ...prev, [name]: value }));
-        } else {
-            setNewCustomer(prev => ({ ...prev, [name]: value }));
-        }
-    };
+  const onSubmit = (values: z.infer<typeof customerSchema>) => {
+    console.log(values);
+    toast({
+      title: "Success",
+      description: "Customer saved successfully",
+    });
+    setOpen(false);
+    form.reset();
+  };
 
-    const handleDeleteClick = (customer: Customer) => {
-        setSelectedCustomer(customer);
-        setIsDeleteDialogOpen(true);
-    };
-
-    const handleUpdateCustomer = async () => {
-        try {
-            await axios.put(`${config.apiURL}/customers/${editForm.id}/`, editForm);
-            await fetchCustomers();
-            setIsEditOpen(false);
-            toast({
-                title: "Success",
-                description: "Customer updated successfully",
-            });
-        } catch (error) {
-            console.error('Error updating customer:', error);
-            toast({
-                title: "Error",
-                description: "Failed to update customer",
-                variant: "destructive",
-            });
-        }
-    };
-
-    const handleCreateCustomer = async () => {
-        try {
-            await axios.post(`${config.apiURL}/customers/`, newCustomer);
-            await fetchCustomers();
-            setIsCreateOpen(false);
-            setNewCustomer(defaultCustomer);
-            toast({
-                title: "Success",
-                description: "Customer created successfully",
-            });
-        } catch (error) {
-            console.error('Error creating customer:', error);
-            toast({
-                title: "Error",
-                description: "Failed to create customer",
-                variant: "destructive",
-            });
-        }
-    };
-
-    const handleDeleteCustomer = async () => {
-        if (!selectedCustomer) return;
-
-        try {
-            await axios.delete(`${config.apiURL}/customers/${selectedCustomer.id}/`);
-            await fetchCustomers();
-            setIsDeleteDialogOpen(false);
-            toast({
-                title: "Success",
-                description: "Customer deleted successfully",
-            });
-        } catch (error) {
-            console.error('Error deleting customer:', error);
-            toast({
-                title: "Error",
-                description: "Failed to delete supplier",
-                variant: "destructive",
-            });
-        }
-    };
-
-    return (
-        <div className="rounded-lg border bg-card">
-            <div className="p-4">
-                <Button onClick={() => setIsCreateOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Customer
-                </Button>
-            </div>
-
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Phone</TableHead>
-                        <TableHead>Company</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {customers.map((customer) => (
-                        <TableRow key={customer.id}>
-                            <TableCell className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarImage src={customer.avatar ?? ''} alt={customer.name} />
-                                    <AvatarFallback>{customer.name.substring(0, 2)}</AvatarFallback>
-                                </Avatar>
-                                <div className="font-medium">{customer.name}</div>
-                            </TableCell>
-                            <TableCell>{customer.contact_email}</TableCell>
-                            <TableCell>{customer.phone}</TableCell>
-                            <TableCell>{customer.company_name}</TableCell>
-                            <TableCell>
-                                <span className={`px-2 py-1 rounded-full text-xs ${
-                                    customer.status === 'active' 
-                                        ? 'bg-green-100 text-green-800' 
-                                        : 'bg-gray-100 text-gray-800'
-                                }`}>
-                                    {customer.status}
-                                </span>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex space-x-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleViewClick(customer)}
-                                    >
-                                        <Eye className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleEditClick(customer)}
-                                    >
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleDeleteClick(customer)}
-                                    >
-                                        <Trash className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-
-            {/* View Customer Dialog */}
-            <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Customer Details</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <div className="flex items-center space-x-4">
-                            <Avatar className="h-16 w-16">
-                                <AvatarImage src={selectedCustomer?.avatar ?? ''} alt={selectedCustomer?.name} />
-                                <AvatarFallback>{selectedCustomer?.name.substring(0, 2)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <h3 className="text-lg font-medium">{selectedCustomer?.name}</h3>
-                                <p className="text-sm text-gray-500">{selectedCustomer?.company_name}</p>
-                            </div>
-                        </div>
-                        <div className="grid gap-4">
-                            <div className="flex items-center space-x-2">
-                                <Mail className="h-4 w-4 text-gray-500" />
-                                <span>{selectedCustomer?.contact_email}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Phone className="h-4 w-4 text-gray-500" />
-                                <span>{selectedCustomer?.phone}</span>
-                            </div>
-                            <div>
-                                <Label>Address</Label>
-                                <p className="mt-1 text-gray-600">{selectedCustomer?.address}</p>
-                            </div>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* Edit Customer Dialog */}
-            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Edit Customer</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="edit-name">Name</Label>
-                            <Input
-                                id="edit-name"
-                                name="name"
-                                value={editForm.name}
-                                onChange={(e) => handleInputChange(e, 'edit')}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="edit-email">Email</Label>
-                            <Input
-                                id="edit-email"
-                                name="contact_email"
-                                type="email"
-                                value={editForm.contact_email}
-                                onChange={(e) => handleInputChange(e, 'edit')}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="edit-phone">Phone</Label>
-                            <Input
-                                id="edit-phone"
-                                name="phone"
-                                value={editForm.phone}
-                                onChange={(e) => handleInputChange(e, 'edit')}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="edit-company">Company</Label>
-                            <Input
-                                id="edit-company_name"
-                                name="company_name"
-                                value={editForm.company_name}
-                                onChange={(e) => handleInputChange(e, 'edit')}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="edit-address">Address</Label>
-                            <Input
-                                id="edit-address"
-                                name="address"
-                                value={editForm.address}
-                                onChange={(e) => handleInputChange(e, 'edit')}
-                            />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                            <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-                                Cancel
-                            </Button>
-                            <Button onClick={handleUpdateCustomer}>
-                                Save Changes
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* Create Customer Dialog */}
-            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Create Customer</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <Label htmlFor="new-name">Name</Label>
-                            <Input
-                                id="new-name"
-                                name="name"
-                                value={newCustomer.name}
-                                onChange={(e) => handleInputChange(e, 'new')}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="new-email">Email</Label>
-                            <Input
-                                id="new-email"
-                                name="contact_email"
-                                type="email"
-                                value={newCustomer.contact_email}
-                                onChange={(e) => handleInputChange(e, 'new')}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="new-phone">Phone</Label>
-                            <Input
-                                id="new-phone"
-                                name="phone"
-                                value={newCustomer.phone}
-                                onChange={(e) => handleInputChange(e, 'new')}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="new-company">Company</Label>
-                            <Input
-                                id="new-company_name"
-                                name="company_name"
-                                value={newCustomer.company_name}
-                                onChange={(e) => handleInputChange(e, 'new')}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="new-address">Address</Label>
-                            <Input
-                                id="new-address"
-                                name="address"
-                                value={newCustomer.address}
-                                onChange={(e) => handleInputChange(e, 'new')}
-                            />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    setIsCreateOpen(false);
-                                    setNewCustomer(defaultCustomer);
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                            <Button onClick={handleCreateCustomer}>
-                                Create Customer
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-            {/* Delete Confirmation Dialog */}
-            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the customer
-                            and remove their data from our servers.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteCustomer} className="bg-red-500 hover:bg-red-600">
-                            Delete
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search customers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
         </div>
-    );
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => {
+              setEditCustomer(null);
+              form.reset(defaultCustomer);
+            }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Customer
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{editCustomer ? "Edit Customer" : "Add Customer"}</DialogTitle>
+              <DialogDescription>
+                {editCustomer ? "Edit customer information" : "Create a new customer"}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Customer name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Customer email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Customer phone" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Customer address" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="company"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Customer company" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notes</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Customer notes" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button type="submit">Save</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead>Company</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredCustomers.map((customer) => (
+            <TableRow key={customer.id}>
+              <TableCell className="font-medium">{customer.name}</TableCell>
+              <TableCell>{customer.email}</TableCell>
+              <TableCell>{customer.phone}</TableCell>
+              <TableCell>{customer.company}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={customer.status === 'active' ? 'default' : customer.status === 'inactive' ? 'secondary' : 'destructive'}
+                >
+                  {customer.status}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEditCustomer(customer);
+                    form.reset(customer);
+                    setOpen(true);
+                  }}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 };
