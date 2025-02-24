@@ -30,9 +30,11 @@ export const UserList = () => {
     const fetchUsers = async () => {
         try {
             const response = await axios.get<User[]>(config.apiURL + '/users/');
-            setUsers(response.data);
+            const userData: User[] = response.data;
+            setUsers(userData);
         } catch (error) {
             console.error('Error fetching users:', error);
+            setUsers([]);
         }
     };
 
@@ -71,8 +73,8 @@ export const UserList = () => {
         if (!editForm || !selectedUser) return;
 
         try {
-            const response = await axios.put(
-                `${config.apiURL}/users/${selectedUser.id}}` + '/', 
+            const response = await axios.put<User>(
+                `${config.apiURL}/users/${selectedUser.id}` + '/', 
                 editForm
             );
 
