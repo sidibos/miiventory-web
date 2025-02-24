@@ -1,44 +1,25 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import config from '@/config';
-import { Eye, Edit, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import {
     Table,
     TableBody,
-    TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
-interface User {
-    name: string;
-    email: string;
-    id: string;
-    age: number;
-    status: string;
-    avatar?: string;
-}
-
-const defaultNewUser: User = {
-    name: '',
-    id: '',
-    email: '',
-    age: 0,
-    status: 'Active'
-};
+import { User, defaultNewUser } from '@/types/user';
+import { UserTableRow } from './UserTableRow';
+import { EditUserDialog } from './EditUserDialog';
+import { ViewUserDialog } from './ViewUserDialog';
+import { CreateUserDialog } from './CreateUserDialog';
 
 export const UserList = () => {
-    const [users, setUsers] = useState([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [editForm, setEditForm] = useState<User | null>(null);
@@ -119,7 +100,6 @@ export const UserList = () => {
         try {
             await axios.post<User>(`${config.apiURL}/users/`, newUser);
             await fetchUsers();
-
             setIsCreating(false);
             setNewUser(defaultNewUser);
             toast({
@@ -134,6 +114,11 @@ export const UserList = () => {
                 variant: "destructive",
             });
         }
+    };
+
+    const handleCancelCreate = () => {
+        setIsCreating(false);
+        setNewUser(defaultNewUser);
     };
 
     return (
@@ -157,189 +142,38 @@ export const UserList = () => {
                 </TableHeader>
                 <TableBody>
                     {users.map((user, index) => (
-                        <TableRow key={index}>
-                            <TableCell className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarImage src={user.avatar ?? ''} alt={user.name} />
-                                    <AvatarFallback>{user.name ? user.name.substring(0, 2) : ''}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <div className="font-medium">{user.name ?? ''}</div>
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="text-sm text-muted-foreground">{user.email}</div>
-                            </TableCell>
-                            <TableCell>
-                                <div className="text-sm text-muted-foreground">{user.age}</div>
-                            </TableCell>
-                            <TableCell>
-                                <Badge
-                                    variant={user.status === "Active" ? "default" : "secondary"}
-                                    className={user.status === "Active" ? "bg-green-100 text-green-800" : ""}
-                                >
-                                    {user.status}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex space-x-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleViewDetails(user)}
-                                    >
-                                        <Eye className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleEditClick(user)}
-                                    >
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
+                        <UserTableRow
+                            key={index}
+                            user={user}
+                            onView={handleViewDetails}
+                            onEdit={handleEditClick}
+                        />
                     ))}
                 </TableBody>
             </Table>
 
-            <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Edit Profile</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                value={editForm?.name || ''}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                value={editForm?.email || ''}
-                                onChange={handleInputChange}
-                                disabled
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="age">Age</Label>
-                            <Input
-                                id="age"
-                                name="age"
-                                type="number"
-                                value={editForm?.age || ''}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="flex justify-end space-x-2 pt-4">
-                            <Button variant="outline" onClick={() => setIsEditing(false)}>
-                                Cancel
-                            </Button>
-                            <Button onClick={handleSubmit}>
-                                Save Changes
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <EditUserDialog
+                isOpen={isEditing}
+                onOpenChange={setIsEditing}
+                editForm={editForm}
+                onInputChange={handleInputChange}
+                onSubmit={handleSubmit}
+            />
 
-            <Dialog open={isViewingDetails} onOpenChange={setIsViewingDetails}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>User Details</DialogTitle>
-                    </DialogHeader>
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-4">
-                                <Avatar className="h-12 w-12">
-                                    <AvatarImage src={selectedUser?.avatar ?? ''} alt={selectedUser?.name} />
-                                    <AvatarFallback>{selectedUser?.name ? selectedUser.name.substring(0, 2) : ''}</AvatarFallback>
-                                </Avatar>
-                                <CardTitle>{selectedUser?.name}</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label>Email</Label>
-                                    <p className="text-sm text-muted-foreground">{selectedUser?.email}</p>
-                                </div>
-                                <div>
-                                    <Label>Age</Label>
-                                    <p className="text-sm text-muted-foreground">{selectedUser?.age}</p>
-                                </div>
-                                <div>
-                                    <Label>Status</Label>
-                                    <Badge
-                                        variant={selectedUser?.status === "Active" ? "default" : "secondary"}
-                                        className={selectedUser?.status === "Active" ? "bg-green-100 text-green-800" : ""}
-                                    >
-                                        {selectedUser?.status}
-                                    </Badge>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </DialogContent>
-            </Dialog>
+            <ViewUserDialog
+                isOpen={isViewingDetails}
+                onOpenChange={setIsViewingDetails}
+                user={selectedUser}
+            />
 
-            <Dialog open={isCreating} onOpenChange={setIsCreating}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Create New User</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="newName">Name</Label>
-                            <Input
-                                id="newName"
-                                name="name"
-                                value={newUser.name}
-                                onChange={handleNewUserInputChange}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="newEmail">Email</Label>
-                            <Input
-                                id="newEmail"
-                                name="email"
-                                type="email"
-                                value={newUser.email}
-                                onChange={handleNewUserInputChange}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="newAge">Age</Label>
-                            <Input
-                                id="newAge"
-                                name="age"
-                                type="number"
-                                value={newUser.age}
-                                onChange={handleNewUserInputChange}
-                            />
-                        </div>
-                        <div className="flex justify-end space-x-2 pt-4">
-                            <Button variant="outline" onClick={() => {
-                                setIsCreating(false);
-                                setNewUser(defaultNewUser);
-                            }}>
-                                Cancel
-                            </Button>
-                            <Button onClick={handleCreateUser}>
-                                Create User
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <CreateUserDialog
+                isOpen={isCreating}
+                onOpenChange={setIsCreating}
+                newUser={newUser}
+                onInputChange={handleNewUserInputChange}
+                onSubmit={handleCreateUser}
+                onCancel={handleCancelCreate}
+            />
         </div>
     );
 };
