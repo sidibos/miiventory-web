@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import config from '@/config';
 
 interface User {
     name: string;
@@ -22,7 +23,7 @@ export const UserProfile = ({ email }) => {
     const { toast } = useToast();
     
     useEffect(() => {
-        axios.get(`http://localhost:7777/api/users/${email}`)
+        axios.get(`${config.apiURL}/users/${email}`)
         .then(response => setUser(response.data as any))
         .catch(error => console.error('Error fetching user:', error));
     }, [email]);
@@ -38,7 +39,7 @@ export const UserProfile = ({ email }) => {
 
     const handleSubmit = async () => {
         try {
-            const response = await axios.put(`http://localhost:7777/api/users/${email}`, editForm);
+            const response = await axios.put(`${config.apiURL}/users/${email}`, editForm);
             setUser(response.data as User);
             setIsEditing(false);
             toast({
