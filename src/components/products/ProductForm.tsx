@@ -17,18 +17,8 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import config from "@/config";
 import { useNavigate } from "react-router-dom";
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
-
-interface Supplier {
-  id: string;
-  name: string;
-  company_name: string;
-}
+import { Category } from "@/types/category";
+import { Supplier } from "@/types/supplier";
 
 interface Product {
     id: string;
@@ -43,7 +33,7 @@ interface Product {
     supplier: string;
     category: string;
     status: 'active' | 'inactive' | 'pending';
-    image:  File | null;
+    image: File | null;
 }
 
 const defaultProduct: Product = {
@@ -62,14 +52,9 @@ const defaultProduct: Product = {
     image: null
 };
 
-const ITEMS_PER_PAGE = 10;
-
 export const ProductForm = () => {
   const navigate = useNavigate();
   const [newProduct, setNewProduct] = useState<Product>(defaultProduct);
-  const [totalPages, setTotalPages] = useState(1);
-  //const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  //const [categories, setCategories] = useState<Category[]>([]);
   const { toast } = useToast();
 
   const { data: categories = [] } = useQuery({
@@ -88,24 +73,12 @@ export const ProductForm = () => {
     }
   });
 
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setNewProduct({ ...newProduct, image: file });
     }
   };
-
-//   const handleSubmit = (e: React.FormEvent) => {
-//     e.preventDefault();
-//     console.log("New product with image:", newProduct);
-//     toast({
-//       title: "Success",
-//       description: "Product added successfully",
-//     });
-    
-//     navigate("/products");
-//   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +98,7 @@ export const ProductForm = () => {
             variant: "destructive",
         });
     }
- };
+  };
 
   return (
     <Card className="max-w-2xl mx-auto">
@@ -141,24 +114,23 @@ export const ProductForm = () => {
             />
           </div>
 
-           <div>
-                <Label htmlFor="edit-name">Slug</Label>
-                <Input
-                id="add-slug"
-                name="slug"
-                value={newProduct.slug}
-                onChange={(e) => setNewProduct({ ...newProduct, slug: e.target.value })}
-                />
-            </div>
-          
-            <div>
-                <Label htmlFor="description">Description</Label>
-                <Input
-                id="description"
-                value={newProduct.description}
-                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                required
-                />
+          <div>
+            <Label htmlFor="slug">Slug</Label>
+            <Input
+              id="slug"
+              value={newProduct.slug}
+              onChange={(e) => setNewProduct({ ...newProduct, slug: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Input
+              id="description"
+              value={newProduct.description}
+              onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+              required
+            />
           </div>
 
           <div>
@@ -172,13 +144,26 @@ export const ProductForm = () => {
               required
             />
           </div>
+
+          <div>
+            <Label htmlFor="selling_price">Selling Price</Label>
+            <Input
+              id="selling_price"
+              type="number"
+              step="0.01"
+              value={newProduct.selling_price}
+              onChange={(e) => setNewProduct({ ...newProduct, selling_price: parseFloat(e.target.value) })}
+              required
+            />
+          </div>
+
           <div>
             <Label htmlFor="category">Category</Label>
             <Select 
               value={newProduct.category}
               onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
@@ -190,13 +175,14 @@ export const ProductForm = () => {
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <Label htmlFor="supplier">Supplier</Label>
             <Select 
               value={newProduct.supplier}
               onValueChange={(value) => setNewProduct({ ...newProduct, supplier: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-white">
                 <SelectValue placeholder="Select a supplier" />
               </SelectTrigger>
               <SelectContent>
@@ -208,6 +194,7 @@ export const ProductForm = () => {
               </SelectContent>
             </Select>
           </div>
+
           <div>
             <Label htmlFor="sku">SKU</Label>
             <Input
@@ -217,6 +204,29 @@ export const ProductForm = () => {
               required
             />
           </div>
+
+          <div>
+            <Label htmlFor="stock">Stock</Label>
+            <Input
+              id="stock"
+              type="number"
+              value={newProduct.stock}
+              onChange={(e) => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="min_stock">Minimum Stock</Label>
+            <Input
+              id="min_stock"
+              type="number"
+              value={newProduct.min_stock}
+              onChange={(e) => setNewProduct({ ...newProduct, min_stock: parseInt(e.target.value) })}
+              required
+            />
+          </div>
+
           <div>
             <Label htmlFor="image">Product Image</Label>
             <div className="flex items-center space-x-2">
@@ -234,6 +244,7 @@ export const ProductForm = () => {
               )}
             </div>
           </div>
+
           <Button type="submit" className="w-full">
             <Upload className="mr-2 h-4 w-4" />
             Add Product
