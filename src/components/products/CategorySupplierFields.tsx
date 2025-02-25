@@ -36,8 +36,8 @@ export const CategorySupplierFields = ({
                     onValueChange={(value) => onChange({ category: value })}
                 >
                     <SelectTrigger id="category" className="w-full bg-white">
-                        <SelectValue placeholder="Select a category">
-                            {selectedCategory?.name}
+                        <SelectValue>
+                            {selectedCategory?.name || "Select a category"}
                         </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -60,8 +60,8 @@ export const CategorySupplierFields = ({
                     onValueChange={(value) => onChange({ supplier: value })}
                 >
                     <SelectTrigger id="supplier" className="w-full bg-white">
-                        <SelectValue placeholder="Select a supplier">
-                            {selectedSupplier ? `${selectedSupplier.name} - ${selectedSupplier.company_name}` : null}
+                        <SelectValue>
+                            {selectedSupplier ? `${selectedSupplier.name} - ${selectedSupplier.company_name}` : "Select a supplier"}
                         </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
