@@ -25,19 +25,22 @@ export const CategorySupplierFields = ({
     onChange 
 }: CategorySupplierFieldsProps) => {
     return (
-        <>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <Label htmlFor="category">Category</Label>
                 <Select 
-                    value={product.category}
+                    value={product.category || ""}
                     onValueChange={(value) => onChange({ category: value })}
                 >
-                    <SelectTrigger className="bg-white">
+                    <SelectTrigger id="category" className="w-full bg-white">
                         <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
                         {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
+                            <SelectItem 
+                                key={category.id} 
+                                value={category.id}
+                            >
                                 {category.name}
                             </SelectItem>
                         ))}
@@ -48,21 +51,24 @@ export const CategorySupplierFields = ({
             <div>
                 <Label htmlFor="supplier">Supplier</Label>
                 <Select 
-                    value={product.supplier}
+                    value={product.supplier || ""}
                     onValueChange={(value) => onChange({ supplier: value })}
                 >
-                    <SelectTrigger className="bg-white">
+                    <SelectTrigger id="supplier" className="w-full bg-white">
                         <SelectValue placeholder="Select a supplier" />
                     </SelectTrigger>
                     <SelectContent>
                         {suppliers.map((supplier) => (
-                            <SelectItem key={supplier.id} value={supplier.id}>
+                            <SelectItem 
+                                key={supplier.id} 
+                                value={supplier.id}
+                            >
                                 {supplier.name} - {supplier.company_name}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
             </div>
-        </>
+        </div>
     );
 };
