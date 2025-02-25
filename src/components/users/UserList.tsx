@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import config from '@/config';
@@ -17,6 +18,10 @@ import { EditUserDialog } from './EditUserDialog';
 import { ViewUserDialog } from './ViewUserDialog';
 import { CreateUserDialog } from './CreateUserDialog';
 
+interface ApiResponse {
+    data: User[];
+}
+
 export const UserList = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [isEditing, setIsEditing] = useState(false);
@@ -29,11 +34,18 @@ export const UserList = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get<{ data: User[] }>(config.apiURL + '/users/');
+            const response = await axios.get<ApiResponse>(config.apiURL + '/users/');
             const userData = response.data.data;
-            if (Array.isArray(userData)) {
-                setUsers(userData);
+            if (Array.isArray(userData) && userData.every(user => 
+                'name' in user && 
+                'email' in user && 
+                'id' in user && 
+                'age' in user && 
+                'status' in user
+            )) {
+                setUsers(userData as User[]);
             } else {
+                console.error('Invalid user data format received');
                 setUsers([]);
             }
         } catch (error) {
@@ -77,8 +89,8 @@ export const UserList = () => {
         if (!editForm || !selectedUser) return;
 
         try {
-            const response = await axios.put(
-                `${config.apiURL}/users/${selectedUser.id}}` + '/', 
+            const response = await axios.put<User>(
+                `${config.apiURL}/users/${selectedUser.id}/`, 
                 editForm
             );
 
