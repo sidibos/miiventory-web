@@ -1,45 +1,17 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CalendarIcon, Plus, X } from "lucide-react";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "@/components/ui/card";
 import config from '@/config';
-import { Supplier } from '@/types/supplier';
 import { useQuery } from '@tanstack/react-query';
-
-interface Product {
-    id: string;
-    name: string;
-    price: number;
-    sku: string;
-    stock: number;
-}
-
-interface SelectedProduct extends Product {
-    quantity: number;
-    supplier_id: string;
-}
+import { Product, SelectedProduct } from '@/types/product';
+import { Supplier } from '@/types/supplier';
+import { PurchaseOrderDatePicker } from '@/components/purchase-orders/PurchaseOrderDatePicker';
+import { ProductSelectionForm } from '@/components/purchase-orders/ProductSelectionForm';
+import { SelectedProductsList } from '@/components/purchase-orders/SelectedProductsList';
 
 const AddPurchaseOrder = () => {
     const [date, setDate] = useState<Date>(new Date());
@@ -50,7 +22,6 @@ const AddPurchaseOrder = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
 
-    // Use React Query for data fetching
     const { data: suppliers = [] } = useQuery({
         queryKey: ['suppliers'],
         queryFn: async () => {
@@ -86,12 +57,10 @@ const AddPurchaseOrder = () => {
             );
 
             if (existingProductIndex >= 0) {
-                // Update quantity if product already exists
                 const updatedProducts = [...selectedProducts];
                 updatedProducts[existingProductIndex].quantity += quantity;
                 setSelectedProducts(updatedProducts);
             } else {
-                // Add new product
                 setSelectedProducts([
                     ...selectedProducts,
                     {
@@ -102,15 +71,10 @@ const AddPurchaseOrder = () => {
                 ]);
             }
             
-            // Reset selection
             setSelectedProductId('');
             setSelectedSupplierId('');
             setQuantity(1);
         }
-    };
-
-    const handleRemoveProduct = (index: number) => {
-        setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async () => {
@@ -166,129 +130,32 @@ const AddPurchaseOrder = () => {
                 
                 <div className="space-y-6 bg-white p-6 rounded-lg shadow">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label>Order Date</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                            "w-full justify-start text-left font-normal",
-                                            !date && "text-muted-foreground"
-                                        )}
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {date ? format(date, "PPP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                        mode="single"
-                                        selected={date}
-                                        onSelect={(newDate) => newDate && setDate(newDate)}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
+                        <PurchaseOrderDatePicker 
+                            date={date}
+                            onDateChange={setDate}
+                        />
                     </div>
 
-                    <div className="border-t pt-6">
-                        <h3 className="text-lg font-medium mb-4">Add Products</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <Label>Product</Label>
-                                <Select
-                                    value={selectedProductId}
-                                    onValueChange={setSelectedProductId}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select product" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {products.map((product) => (
-                                            <SelectItem key={product.id} value={product.id}>
-                                                {product.name} (${product.price})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Supplier</Label>
-                                <Select
-                                    value={selectedSupplierId}
-                                    onValueChange={setSelectedSupplierId}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select supplier" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {suppliers.map((supplier) => (
-                                            <SelectItem key={supplier.id} value={supplier.id}>
-                                                {supplier.name} - {supplier.company_name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Quantity</Label>
-                                <Input 
-                                    type="number" 
-                                    min="1"
-                                    value={quantity}
-                                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                                />
-                            </div>
-                            <div className="flex items-end">
-                                <Button onClick={handleAddProduct} className="w-full">
-                                    <Plus className="mr-2 h-4 w-4" /> Add Product
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                    <ProductSelectionForm 
+                        products={products}
+                        suppliers={suppliers}
+                        selectedProductId={selectedProductId}
+                        selectedSupplierId={selectedSupplierId}
+                        quantity={quantity}
+                        onProductChange={setSelectedProductId}
+                        onSupplierChange={setSelectedSupplierId}
+                        onQuantityChange={setQuantity}
+                        onAddProduct={handleAddProduct}
+                    />
 
-                    {selectedProducts.length > 0 && (
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-medium">Selected Products</h3>
-                            <div className="space-y-3">
-                                {selectedProducts.map((product, index) => {
-                                    const supplier = suppliers.find(s => s.id === product.supplier_id);
-                                    return (
-                                        <Card key={index}>
-                                            <CardContent className="flex items-center justify-between p-4">
-                                                <div>
-                                                    <p className="font-medium">{product.name}</p>
-                                                    <p className="text-sm text-gray-500">
-                                                        Supplier: {supplier?.name} | Quantity: {product.quantity} |
-                                                        Price: ${(product.price * product.quantity).toFixed(2)}
-                                                    </p>
-                                                </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleRemoveProduct(index)}
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            </CardContent>
-                                        </Card>
-                                    );
-                                })}
-                            </div>
-                            <div className="flex justify-between items-center pt-4 border-t">
-                                <div className="text-lg font-medium">
-                                    Total: ${selectedProducts.reduce((sum, product) => 
-                                        sum + (product.price * product.quantity), 0
-                                    ).toFixed(2)}
-                                </div>
-                                <Button onClick={handleSubmit}>
-                                    Create Purchase Order
-                                </Button>
-                            </div>
-                        </div>
-                    )}
+                    <SelectedProductsList 
+                        selectedProducts={selectedProducts}
+                        suppliers={suppliers}
+                        onRemoveProduct={(index) => {
+                            setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
+                        }}
+                        onSubmit={handleSubmit}
+                    />
                 </div>
             </main>
         </div>
