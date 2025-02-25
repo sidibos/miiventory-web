@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import config from '@/config';
 import { Supplier } from '@/types/supplier';
+import { useQuery } from '@tanstack/react-query';
 
 interface Product {
     id: string;
@@ -42,8 +43,6 @@ interface SelectedProduct extends Product {
 
 const AddPurchaseOrder = () => {
     const [date, setDate] = useState<Date>(new Date());
-    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-    const [products, setProducts] = useState<Product[]>([]);
     const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
     const [selectedProductId, setSelectedProductId] = useState<string>('');
     const [quantity, setQuantity] = useState<number>(1);
@@ -51,40 +50,24 @@ const AddPurchaseOrder = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
 
-    const fetchSuppliers = async () => {
-        try {
+    // Use React Query for data fetching
+    const { data: suppliers = [] } = useQuery({
+        queryKey: ['suppliers'],
+        queryFn: async () => {
             const response = await axios.get<Supplier[]>(`${config.apiURL}/suppliers${config.slash}`);
-            setSuppliers(response.data);
-        } catch (error) {
-            console.error('Error fetching suppliers:', error);
-            toast({
-                title: "Error",
-                description: "Failed to fetch suppliers",
-                variant: "destructive",
-            });
-        }
-    };
+            return response.data;
+        },
+    });
 
-    const fetchProducts = async () => {
-        try {
+    const { data: products = [] } = useQuery({
+        queryKey: ['products'],
+        queryFn: async () => {
             const response = await axios.get<{ data: Product[], total: number }>(
                 `${config.apiURL}/products${config.slash}`
             );
-            setProducts(response.data.data);
-        } catch (error) {
-            console.error('Error fetching products:', error);
-            toast({
-                title: "Error",
-                description: "Failed to fetch products",
-                variant: "destructive",
-            });
-        }
-    };
-
-    useEffect(() => {
-        fetchSuppliers();
-        fetchProducts();
-    }, []);
+            return response.data.data;
+        },
+    });
 
     const handleAddProduct = () => {
         if (!selectedProductId || !selectedSupplierId || quantity <= 0) {
@@ -98,15 +81,30 @@ const AddPurchaseOrder = () => {
 
         const product = products.find(p => p.id === selectedProductId);
         if (product) {
-            setSelectedProducts([
-                ...selectedProducts,
-                {
-                    ...product,
-                    quantity,
-                    supplier_id: selectedSupplierId
-                }
-            ]);
+            const existingProductIndex = selectedProducts.findIndex(
+                p => p.id === selectedProductId && p.supplier_id === selectedSupplierId
+            );
+
+            if (existingProductIndex >= 0) {
+                // Update quantity if product already exists
+                const updatedProducts = [...selectedProducts];
+                updatedProducts[existingProductIndex].quantity += quantity;
+                setSelectedProducts(updatedProducts);
+            } else {
+                // Add new product
+                setSelectedProducts([
+                    ...selectedProducts,
+                    {
+                        ...product,
+                        quantity,
+                        supplier_id: selectedSupplierId
+                    }
+                ]);
+            }
+            
+            // Reset selection
             setSelectedProductId('');
+            setSelectedSupplierId('');
             setQuantity(1);
         }
     };
@@ -200,14 +198,17 @@ const AddPurchaseOrder = () => {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <Label>Product</Label>
-                                <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                                <Select
+                                    value={selectedProductId}
+                                    onValueChange={setSelectedProductId}
+                                >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select product" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {products.map((product) => (
                                             <SelectItem key={product.id} value={product.id}>
-                                                {product.name}
+                                                {product.name} (${product.price})
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -215,14 +216,17 @@ const AddPurchaseOrder = () => {
                             </div>
                             <div>
                                 <Label>Supplier</Label>
-                                <Select value={selectedSupplierId} onValueChange={setSelectedSupplierId}>
+                                <Select
+                                    value={selectedSupplierId}
+                                    onValueChange={setSelectedSupplierId}
+                                >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select supplier" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {suppliers.map((supplier) => (
                                             <SelectItem key={supplier.id} value={supplier.id}>
-                                                {supplier.name}
+                                                {supplier.name} - {supplier.company_name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -258,7 +262,7 @@ const AddPurchaseOrder = () => {
                                                     <p className="font-medium">{product.name}</p>
                                                     <p className="text-sm text-gray-500">
                                                         Supplier: {supplier?.name} | Quantity: {product.quantity} |
-                                                        Price: ${product.price * product.quantity}
+                                                        Price: ${(product.price * product.quantity).toFixed(2)}
                                                     </p>
                                                 </div>
                                                 <Button
