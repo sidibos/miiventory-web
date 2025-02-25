@@ -29,7 +29,7 @@ export const CategorySupplierFields = ({
             <div>
                 <Label htmlFor="category">Category</Label>
                 <Select 
-                    defaultValue={product.category || undefined}
+                    value={product.category}
                     onValueChange={(value) => onChange({ category: value })}
                 >
                     <SelectTrigger id="category" className="w-full bg-white">
@@ -51,7 +51,7 @@ export const CategorySupplierFields = ({
             <div>
                 <Label htmlFor="supplier">Supplier</Label>
                 <Select 
-                    defaultValue={product.supplier || undefined}
+                    value={product.supplier}
                     onValueChange={(value) => onChange({ supplier: value })}
                 >
                     <SelectTrigger id="supplier" className="w-full bg-white">
