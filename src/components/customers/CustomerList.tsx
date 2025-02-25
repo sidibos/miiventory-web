@@ -188,10 +188,6 @@ export const CustomerList = () => {
                     {customers.map((customer) => (
                         <TableRow key={customer.id}>
                             <TableCell className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarImage src={customer.avatar ?? ''} alt={customer.name} />
-                                    <AvatarFallback>{customer.name.substring(0, 2)}</AvatarFallback>
-                                </Avatar>
                                 <div className="font-medium">{customer.name}</div>
                             </TableCell>
                             <TableCell>{customer.contact_email}</TableCell>
@@ -244,10 +240,6 @@ export const CustomerList = () => {
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="flex items-center space-x-4">
-                            <Avatar className="h-16 w-16">
-                                <AvatarImage src={selectedCustomer?.avatar ?? ''} alt={selectedCustomer?.name} />
-                                <AvatarFallback>{selectedCustomer?.name.substring(0, 2)}</AvatarFallback>
-                            </Avatar>
                             <div>
                                 <h3 className="text-lg font-medium">{selectedCustomer?.name}</h3>
                                 <p className="text-sm text-gray-500">{selectedCustomer?.company_name}</p>

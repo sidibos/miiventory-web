@@ -1,6 +1,6 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import {
     Table,
@@ -25,12 +25,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, Edit, Plus, Trash } from 'lucide-react';
 import config from '@/config';
 
-interface PurchaseOrdersResponse {
-    orders: PurchaseOrder[];
-    hasMore: boolean;
-    total: number;
-}
-
 interface PurchaseOrder {
     id: string;
     order_number: string;
@@ -44,17 +38,6 @@ interface PurchaseOrder {
 
 const ITEMS_PER_PAGE = 10;
 
-const defaultPurchaseOrder: PurchaseOrder = {
-    id: '',
-    order_number: '',
-    customer_id: '',
-    total_amount: 0,
-    status: 'pending',
-    order_date: new Date().toISOString().split('T')[0],
-    shipping_address: '',
-    notes: ''
-};
-
 export const PurchaseOrderList = () => {
     const [deleteOrderId, setDeleteOrderId] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -63,30 +46,20 @@ export const PurchaseOrderList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
-    const currentPageSize = 10;
 
-    // const { data, isLoading, refetch } = useQuery<PurchaseOrdersResponse>({
-    //     queryKey: ['purchaseOrders', currentPage],
-    //     queryFn: async (): Promise<PurchaseOrdersResponse> => {
-    //         const response = await axios.get(`${config.apiURL}/purchase-orders?currentPage=${currentPage}&limit=${currentPageSize}`);
-    //         return response.data as PurchaseOrdersResponse;
-    //     },
-    // });
-
-    const fetchPurchaseOrders = async (currentPage: number) => {
+    const fetchPurchaseOrders = async (page: number) => {
         try {
             const response = await axios.get<{ data: PurchaseOrder[], total: number }>(
-                `${config.apiURL}/purchase-orders/?currentPage=${currentPage}&limit=${ITEMS_PER_PAGE}`
+                `${config.apiURL}/purchase-orders/?currentPage=${page}&limit=${ITEMS_PER_PAGE}`
             );
             setPurchaseOrders(response.data.data);
-            let totalPages = Math.ceil(response.data.total / ITEMS_PER_PAGE) || 1;
-            setTotalPages(totalPages);
+            setTotalPages(Math.ceil(response.data.total / ITEMS_PER_PAGE) || 1);
             setIsLoading(false);
         } catch (error) {
-            console.error('Error fetching sales orders:', error);
+            console.error('Error fetching purchase orders:', error);
             toast({
                 title: "Error",
-                description: "Failed to fetch sales orders",
+                description: "Failed to fetch purchase orders",
                 variant: "destructive",
             });
         }
@@ -95,7 +68,6 @@ export const PurchaseOrderList = () => {
     useEffect(() => {
         fetchPurchaseOrders(currentPage);
     }, [currentPage]);
-    
 
     const handleDelete = async () => {
         if (!deleteOrderId) return;
@@ -106,7 +78,7 @@ export const PurchaseOrderList = () => {
                 title: "Success",
                 description: "Purchase order deleted successfully",
             });
-            refetch();
+            fetchPurchaseOrders(currentPage);
         } catch (error) {
             toast({
                 title: "Error",
@@ -141,7 +113,7 @@ export const PurchaseOrderList = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {purchaseOrders.map((order: PurchaseOrder) => (
+                        {purchaseOrders.map((order) => (
                             <TableRow key={order.id}>
                                 <TableCell>{order.id}</TableCell>
                                 <TableCell>{new Date(order.order_date).toLocaleDateString()}</TableCell>

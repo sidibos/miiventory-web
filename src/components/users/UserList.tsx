@@ -29,10 +29,16 @@ export const UserList = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get<User[]>(config.apiURL + '/users/');
-            setUsers(response.data);
+            const response = await axios.get<{ data: User[] }>(config.apiURL + '/users/');
+            const userData = response.data.data;
+            if (Array.isArray(userData)) {
+                setUsers(userData);
+            } else {
+                setUsers([]);
+            }
         } catch (error) {
             console.error('Error fetching users:', error);
+            setUsers([]);
         }
     };
 
