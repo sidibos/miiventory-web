@@ -42,33 +42,36 @@ export const ProductForm = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setProduct({ ...product, image: file });
+      setProduct(prev => ({ ...prev, image: file }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        await axios.post(`${config.apiURL}/products/`, product);
-        setProduct(defaultProduct);
-        toast({
-            title: "Success",
-            description: "Product created successfully",
-        });
-        navigate("/products");
+      await axios.post(`${config.apiURL}/products/`, product);
+      setProduct(defaultProduct);
+      toast({
+        title: "Success",
+        description: "Product created successfully",
+      });
+      navigate("/products");
     } catch (error) {
-        console.error('Error creating product:', error);
-        toast({
-            title: "Error",
-            description: "Failed to create product",
-            variant: "destructive",
-        });
+      console.error('Error creating product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create product",
+        variant: "destructive",
+      });
     }
   };
 
   const handleChange = (updates: Partial<ProductFormData>) => {
+    console.log('Updating product with:', updates); // Add this line for debugging
     setProduct(prev => ({ ...prev, ...updates }));
   };
+
+  console.log('Current product state:', product); // Add this line for debugging
 
   return (
     <Card className="max-w-2xl mx-auto">
