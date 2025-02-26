@@ -24,6 +24,10 @@ export const CategorySupplierFields = ({
     suppliers, 
     onChange 
 }: CategorySupplierFieldsProps) => {
+    // Find the selected category and supplier to display their names
+    const selectedCategory = categories.find(c => c.id === product.category);
+    const selectedSupplier = suppliers.find(s => s.id === product.supplier);
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -33,7 +37,9 @@ export const CategorySupplierFields = ({
                     onValueChange={(value) => onChange({ category: value })}
                 >
                     <SelectTrigger id="category" className="w-full bg-white">
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue>
+                            {selectedCategory?.name || "Select a category"}
+                        </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                         {categories.map((category) => (
@@ -55,7 +61,12 @@ export const CategorySupplierFields = ({
                     onValueChange={(value) => onChange({ supplier: value })}
                 >
                     <SelectTrigger id="supplier" className="w-full bg-white">
-                        <SelectValue placeholder="Select a supplier" />
+                        <SelectValue>
+                            {selectedSupplier ? 
+                                `${selectedSupplier.name} - ${selectedSupplier.company_name}` : 
+                                "Select a supplier"
+                            }
+                        </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                         {suppliers.map((supplier) => (
