@@ -10,6 +10,7 @@ import {
 import { Category } from "@/types/category";
 import { Supplier } from "@/types/supplier";
 import { ProductFormData } from "./types";
+import { useEffect } from "react";
 
 interface CategorySupplierFieldsProps {
     product: ProductFormData;
@@ -28,13 +29,29 @@ export const CategorySupplierFields = ({
     const selectedCategory = categories.find(c => c.id === String(product.category));
     const selectedSupplier = suppliers.find(s => s.id === String(product.supplier));
 
+    // Debug logs
+    console.log('Product Category:', product.category);
+    console.log('Selected Category:', selectedCategory);
+    console.log('Product Supplier:', product.supplier);
+    console.log('Selected Supplier:', selectedSupplier);
+
+    const handleCategoryChange = (value: string) => {
+        console.log('Category changed to:', value);
+        onChange({ category: value });
+    };
+
+    const handleSupplierChange = (value: string) => {
+        console.log('Supplier changed to:', value);
+        onChange({ supplier: value });
+    };
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <Label htmlFor="category">Category</Label>
                 <Select 
                     value={String(product.category)}
-                    onValueChange={(value) => onChange({ category: value })}
+                    onValueChange={handleCategoryChange}
                 >
                     <SelectTrigger id="category" className="w-full bg-white">
                         <SelectValue placeholder="Select a category">
@@ -58,7 +75,7 @@ export const CategorySupplierFields = ({
                 <Label htmlFor="supplier">Supplier</Label>
                 <Select 
                     value={String(product.supplier)}
-                    onValueChange={(value) => onChange({ supplier: value })}
+                    onValueChange={handleSupplierChange}
                 >
                     <SelectTrigger id="supplier" className="w-full bg-white">
                         <SelectValue placeholder="Select a supplier">
