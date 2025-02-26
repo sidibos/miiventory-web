@@ -24,20 +24,20 @@ export const CategorySupplierFields = ({
     suppliers, 
     onChange 
 }: CategorySupplierFieldsProps) => {
-    // Find the selected category and supplier to display their names
-    const selectedCategory = categories.find(c => c.id === product.category);
-    const selectedSupplier = suppliers.find(s => s.id === product.supplier);
+    // Convert IDs to strings for comparison
+    const selectedCategory = categories.find(c => c.id === String(product.category));
+    const selectedSupplier = suppliers.find(s => s.id === String(product.supplier));
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <Label htmlFor="category">Category</Label>
                 <Select 
-                    value={product.category}
+                    value={String(product.category)}
                     onValueChange={(value) => onChange({ category: value })}
                 >
                     <SelectTrigger id="category" className="w-full bg-white">
-                        <SelectValue>
+                        <SelectValue placeholder="Select a category">
                             {selectedCategory?.name || "Select a category"}
                         </SelectValue>
                     </SelectTrigger>
@@ -45,7 +45,7 @@ export const CategorySupplierFields = ({
                         {categories.map((category) => (
                             <SelectItem 
                                 key={category.id} 
-                                value={category.id}
+                                value={String(category.id)}
                             >
                                 {category.name}
                             </SelectItem>
@@ -57,11 +57,11 @@ export const CategorySupplierFields = ({
             <div>
                 <Label htmlFor="supplier">Supplier</Label>
                 <Select 
-                    value={product.supplier}
+                    value={String(product.supplier)}
                     onValueChange={(value) => onChange({ supplier: value })}
                 >
                     <SelectTrigger id="supplier" className="w-full bg-white">
-                        <SelectValue>
+                        <SelectValue placeholder="Select a supplier">
                             {selectedSupplier ? 
                                 `${selectedSupplier.name} - ${selectedSupplier.company_name}` : 
                                 "Select a supplier"
@@ -72,7 +72,7 @@ export const CategorySupplierFields = ({
                         {suppliers.map((supplier) => (
                             <SelectItem 
                                 key={supplier.id} 
-                                value={supplier.id}
+                                value={String(supplier.id)}
                             >
                                 {supplier.name} - {supplier.company_name}
                             </SelectItem>
