@@ -3,10 +3,26 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CalendarIcon, Plus, X } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { ProductDragList } from "@/components/purchase-orders/ProductDragList";
-import { OrderHeader } from "@/components/purchase-orders/OrderHeader";
-import { OrderSummary } from "@/components/purchase-orders/OrderSummary";
+import { Card, CardContent } from "@/components/ui/card";
 import config from '@/config';
 import { Supplier } from '@/types/supplier';
 
@@ -16,20 +32,21 @@ interface Product {
     price: number;
     sku: string;
     stock: number;
-    thumbnail?: string;
 }
 
 interface SelectedProduct extends Product {
     quantity: number;
+    supplier_id: string;
 }
 
 const AddPurchaseOrder = () => {
+    const [date, setDate] = useState<Date>(new Date());
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
+    const [selectedProductId, setSelectedProductId] = useState<string>('');
+    const [quantity, setQuantity] = useState<number>(1);
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
-    const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
-    const [orderStatus, setOrderStatus] = useState<string>('pending');
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -53,7 +70,6 @@ const AddPurchaseOrder = () => {
                 `${config.apiURL}/products${config.slash}`
             );
             setProducts(response.data.data);
-            setAvailableProducts(response.data.data);
         } catch (error) {
             console.error('Error fetching products:', error);
             toast({
@@ -69,81 +85,56 @@ const AddPurchaseOrder = () => {
         fetchProducts();
     }, []);
 
-    const handleDragEnd = (result: any) => {
-        if (!result.destination) return;
-
-        const { source, destination } = result;
-
-        if (source.droppableId === 'available-products' && destination.droppableId === 'selected-products') {
-            const product = availableProducts[source.index];
-            const selectedProduct: SelectedProduct = {
-                ...product,
-                quantity: 1
-            };
-
-            setSelectedProducts([...selectedProducts, selectedProduct]);
-            setAvailableProducts(availableProducts.filter(p => p.id !== product.id));
-        } else if (source.droppableId === 'selected-products' && destination.droppableId === 'available-products') {
-            const product = selectedProducts[source.index];
-            setAvailableProducts([...availableProducts, products.find(p => p.id === product.id)!]);
-            setSelectedProducts(selectedProducts.filter(p => p.id !== product.id));
-        }
-    };
-
-    const handleCancel = () => {
-        navigate('/purchase-orders');
-    };
-
-    const removeSelectedProduct = (productId: string) => {
-        const product = selectedProducts.find(p => p.id === productId);
-        if (product) {
-            setSelectedProducts(selectedProducts.filter(p => p.id !== productId));
-            setAvailableProducts([...availableProducts, products.find(p => p.id === productId)!]);
-        }
-    };
-
-    const calculateSubtotal = () => {
-        return selectedProducts.reduce((sum, product) => 
-            sum + (product.price * product.quantity), 0
-        );
-    };
-
-    const calculateTotalItems = () => {
-        return selectedProducts.reduce((sum, product) => 
-            sum + product.quantity, 0
-        );
-    };
-
-    const handleSave = async () => {
-        if (!selectedSupplierId) {
+    const handleAddProduct = () => {
+        if (!selectedProductId || !selectedSupplierId || quantity <= 0) {
             toast({
                 title: "Error",
-                description: "Please select a supplier",
+                description: "Please select a product, supplier and valid quantity",
                 variant: "destructive",
             });
             return;
         }
 
+        const product = products.find(p => p.id === selectedProductId);
+        if (product) {
+            setSelectedProducts([
+                ...selectedProducts,
+                {
+                    ...product,
+                    quantity,
+                    supplier_id: selectedSupplierId
+                }
+            ]);
+            setSelectedProductId('');
+            setQuantity(1);
+        }
+    };
+
+    const handleRemoveProduct = (index: number) => {
+        setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
+    };
+
+    const handleSubmit = async () => {
         if (selectedProducts.length === 0) {
             toast({
                 title: "Error",
-                description: "Please select at least one product",
+                description: "Please add at least one product",
                 variant: "destructive",
             });
             return;
         }
 
         const orderData = {
-            supplier_id: selectedSupplierId,
-            order_date: new Date().toISOString(),
-            order_status: orderStatus,
+            order_date: date.toISOString(),
             products: selectedProducts.map(product => ({
                 product_id: product.id,
+                supplier_id: product.supplier_id,
                 quantity: product.quantity,
                 price: product.price
             })),
-            total_amount: calculateSubtotal(),
-            total_items: calculateTotalItems(),
+            total_amount: selectedProducts.reduce((sum, product) => 
+                sum + (product.price * product.quantity), 0
+            ),
         };
 
         try {
@@ -169,37 +160,130 @@ const AddPurchaseOrder = () => {
             <main className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-semibold text-gray-900">Add New Purchase Order</h2>
-                    <div className="space-x-2">
-                        <Button variant="outline" onClick={handleCancel}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSave}>
-                            Save Order
-                        </Button>
-                    </div>
+                    <Button variant="outline" onClick={() => navigate('/purchase-orders')}>
+                        Cancel
+                    </Button>
                 </div>
-                <div className="bg-white rounded-lg shadow p-6 max-w-6xl mx-auto">
-                    <div className="space-y-6">
-                        <OrderHeader
-                            suppliers={suppliers}
-                            selectedSupplierId={selectedSupplierId}
-                            orderStatus={orderStatus}
-                            onSupplierChange={setSelectedSupplierId}
-                            onStatusChange={setOrderStatus}
-                        />
-
-                        <ProductDragList
-                            availableProducts={availableProducts}
-                            selectedProducts={selectedProducts}
-                            onDragEnd={handleDragEnd}
-                            onRemoveProduct={removeSelectedProduct}
-                        />
-
-                        <OrderSummary
-                            totalItems={calculateTotalItems()}
-                            subtotal={calculateSubtotal()}
-                        />
+                
+                <div className="space-y-6 bg-white p-6 rounded-lg shadow">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label>Order Date</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !date && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={date}
+                                        onSelect={(newDate) => newDate && setDate(newDate)}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
                     </div>
+
+                    <div className="border-t pt-6">
+                        <h3 className="text-lg font-medium mb-4">Add Products</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <Label>Product</Label>
+                                <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select product" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {products.map((product) => (
+                                            <SelectItem key={product.id} value={product.id}>
+                                                {product.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Supplier</Label>
+                                <Select value={selectedSupplierId} onValueChange={setSelectedSupplierId}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select supplier" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {suppliers.map((supplier) => (
+                                            <SelectItem key={supplier.id} value={supplier.id}>
+                                                {supplier.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Quantity</Label>
+                                <Input 
+                                    type="number" 
+                                    min="1"
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                                />
+                            </div>
+                            <div className="flex items-end">
+                                <Button onClick={handleAddProduct} className="w-full">
+                                    <Plus className="mr-2 h-4 w-4" /> Add Product
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {selectedProducts.length > 0 && (
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium">Selected Products</h3>
+                            <div className="space-y-3">
+                                {selectedProducts.map((product, index) => {
+                                    const supplier = suppliers.find(s => s.id === product.supplier_id);
+                                    return (
+                                        <Card key={index}>
+                                            <CardContent className="flex items-center justify-between p-4">
+                                                <div>
+                                                    <p className="font-medium">{product.name}</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        Supplier: {supplier?.name} | Quantity: {product.quantity} |
+                                                        Price: ${product.price * product.quantity}
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleRemoveProduct(index)}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex justify-between items-center pt-4 border-t">
+                                <div className="text-lg font-medium">
+                                    Total: ${selectedProducts.reduce((sum, product) => 
+                                        sum + (product.price * product.quantity), 0
+                                    ).toFixed(2)}
+                                </div>
+                                <Button onClick={handleSubmit}>
+                                    Create Purchase Order
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
         </div>

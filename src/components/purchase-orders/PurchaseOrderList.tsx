@@ -106,7 +106,7 @@ export const PurchaseOrderList = () => {
                 title: "Success",
                 description: "Purchase order deleted successfully",
             });
-            refetch();
+            fetchPurchaseOrders(currentPage);
         } catch (error) {
             toast({
                 title: "Error",
@@ -123,11 +123,11 @@ export const PurchaseOrderList = () => {
 
     return (
         <div>
-            <div className="flex justify-between mb-4">
+            {/* <div className="flex justify-between mb-4">
                 <Button onClick={() => navigate('/purchase-orders/add')}>
                     <Plus className="mr-2 h-4 w-4" /> Add Purchase Order
                 </Button>
-            </div>
+            </div> */}
 
             <div className="rounded-md border">
                 <Table>
