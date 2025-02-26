@@ -33,14 +33,14 @@ export const CategorySupplierFields = ({
         console.log('Category changed to:', value);
         onChange({ category: value });
         console.log('prd cat: ' + value);
-        setSelectedCategory(categories.find(c => c.id === value));
+        setSelectedCategory(categories.find(c => parseInt(c.id) === parseInt(value)));
     };
 
     const handleSupplierChange = (value: string) => {
         console.log('Supplier changed to:', value);
 
         onChange({ supplier: value });
-        setSelectedSupplier(suppliers.find(s => s.id == value));
+        setSelectedSupplier(suppliers.find(s => parseInt(s.id) === parseInt(value)));
     };
 
     return (

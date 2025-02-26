@@ -29,6 +29,11 @@ import {
 } from "@/components/ui/select";
 import { Supplier } from '@/types/supplier';
 import { Category } from '@/types/category';
+import { ProductFormData } from "./types";
+import { ProductCard  } from "./ProductCard";
+import { ViewProductDialog } from "./ViewProductDialog";
+import { DeleteProductDialog } from "./DeleteProductDialog";
+
 
 
 interface Product {
@@ -205,6 +210,28 @@ export const ProductList = () => {
         }
     };
 
+
+    const handleDeleteConfirm = async () => {
+        if (!selectedProduct) return;
+
+        try {
+            await axios.delete(`${config.apiURL}/products/${selectedProduct.id}${config.slash}`);
+            await fetchProducts(currentPage);
+            setIsDeleteDialogOpen(false);
+            toast({
+                title: "Success",
+                description: "Product deleted successfully",
+            });
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            toast({
+                title: "Error",
+                description: "Failed to delete product",
+                variant: "destructive",
+            });
+        }
+    };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -223,50 +250,35 @@ export const ProductList = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProducts.map((product) => (
-          <Card key={product.id}>
-            <CardHeader>
-              <CardTitle>{product.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500">SKU: {product.sku}</p>
-              <p className="text-sm text-gray-500">Category: {product.category}</p>
-              <p className="text-lg font-semibold">${product.price}</p>
-            </CardContent>
-            <CardFooter className="flex justify-end space-x-2">
-                <div className="flex space-x-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewClick(product)}
-                    >
-                        <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditClick(product)}
-                    >
-                        <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteClick(product)}
-                    >
-                        <Trash className="h-4 w-4 text-red-500" />
-                    </Button>
-                </div>
-              {/* <Button variant="outline" size="sm">
-                Edit
-              </Button>
-              <Button variant="destructive" size="sm">
-                Delete
-              </Button> */}
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+            {products
+                .filter((product) =>
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map((product) => (
+                    <ProductCard
+                        key={product.id}
+                        product={product}
+                        categories={categories}
+                        onView={handleViewClick}
+                        onEdit={handleEditClick}
+                        onDelete={handleDeleteClick}
+                    />
+            ))}
+        </div>
+
+        <ViewProductDialog
+                isOpen={isViewOpen}
+                onOpenChange={setIsViewOpen}
+                product={selectedProduct}
+                categories={categories}
+                suppliers={suppliers}
+        />
+
+        <DeleteProductDialog
+            isOpen={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+            onConfirm={handleDeleteConfirm}
+        />
       
         {/* Pagination */}
         <div className="flex items-center justify-center space-x-2 py-4">
