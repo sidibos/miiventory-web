@@ -32,6 +32,7 @@ interface Product {
     price: number;
     sku: string;
     stock: number;
+    supplier_id?: string;
 }
 
 interface SelectedProduct extends Product {
@@ -43,10 +44,12 @@ const AddPurchaseOrder = () => {
     const [date, setDate] = useState<Date>(new Date());
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
+    const [isLoadingProducts, setIsLoadingProducts] = useState(false);
     const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
     const [selectedProductId, setSelectedProductId] = useState<string>('');
     const [quantity, setQuantity] = useState<number>(1);
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
+    const [open, setOpen] = useState(false); // State to control date picker popup
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -64,32 +67,51 @@ const AddPurchaseOrder = () => {
         }
     };
 
-    const fetchProducts = async () => {
+    const fetchProductsBySupplier = async (supplierId: string) => {
+        if (!supplierId) return;
+        
+        setIsLoadingProducts(true);
         try {
             const response = await axios.get<{ data: Product[], total: number }>(
-                `${config.apiURL}/products${config.slash}`
+                `${config.apiURL}/products/supplier/${supplierId}${config.slash}`
             );
             setProducts(response.data.data);
+            setSelectedProductId(''); // Reset selected product when supplier changes
         } catch (error) {
-            console.error('Error fetching products:', error);
+            console.error('Error fetching products for supplier:', error);
             toast({
                 title: "Error",
-                description: "Failed to fetch products",
+                description: "Failed to fetch products for this supplier",
                 variant: "destructive",
             });
+            setProducts([]);
+        } finally {
+            setIsLoadingProducts(false);
         }
     };
 
     useEffect(() => {
         fetchSuppliers();
-        fetchProducts();
     }, []);
+
+    useEffect(() => {
+        if (selectedSupplierId) {
+            fetchProductsBySupplier(selectedSupplierId);
+        } else {
+            setProducts([]);
+        }
+    }, [selectedSupplierId]);
+
+    const handleSupplierChange = (supplierId: string) => {
+        setSelectedSupplierId(supplierId);
+        setSelectedProductId('');
+    };
 
     const handleAddProduct = () => {
         if (!selectedProductId || !selectedSupplierId || quantity <= 0) {
             toast({
                 title: "Error",
-                description: "Please select a product, supplier and valid quantity",
+                description: "Please select a product and valid quantity",
                 variant: "destructive",
             });
             return;
@@ -169,7 +191,7 @@ const AddPurchaseOrder = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Order Date</Label>
-                            <Popover>
+                            <Popover open={open} onOpenChange={setOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
                                         variant={"outline"}
@@ -186,22 +208,57 @@ const AddPurchaseOrder = () => {
                                     <Calendar
                                         mode="single"
                                         selected={date}
-                                        onSelect={(newDate) => newDate && setDate(newDate)}
+                                        onSelect={(newDate) => {
+                                            if (newDate) {
+                                                setDate(newDate);
+                                                setOpen(false); // Close the popover when date is selected
+                                            }
+                                        }}
                                         initialFocus
                                     />
                                 </PopoverContent>
                             </Popover>
                         </div>
+                        
+                        <div className="space-y-2">
+                            <Label>Supplier</Label>
+                            <Select value={selectedSupplierId} onValueChange={handleSupplierChange}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select supplier" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {suppliers.map((supplier) => (
+                                        <SelectItem key={supplier.id} value={supplier.id}>
+                                            {supplier.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <div className="border-t pt-6">
                         <h3 className="text-lg font-medium mb-4">Add Products</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <Label>Product</Label>
-                                <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                                <Select 
+                                    value={selectedProductId} 
+                                    onValueChange={setSelectedProductId} 
+                                    disabled={!selectedSupplierId || isLoadingProducts}
+                                >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select product" />
+                                        <SelectValue 
+                                            placeholder={
+                                                isLoadingProducts 
+                                                    ? "Loading products..." 
+                                                    : !selectedSupplierId 
+                                                        ? "Select a supplier first" 
+                                                        : products.length === 0 
+                                                            ? "No products available" 
+                                                            : "Select product"
+                                            } 
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {products.map((product) => (
@@ -213,33 +270,23 @@ const AddPurchaseOrder = () => {
                                 </Select>
                             </div>
                             <div>
-                                <Label>Supplier</Label>
-                                <Select value={selectedSupplierId} onValueChange={setSelectedSupplierId}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select supplier" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {suppliers.map((supplier) => (
-                                            <SelectItem key={supplier.id} value={supplier.id}>
-                                                {supplier.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
                                 <Label>Quantity</Label>
-                                <Input 
-                                    type="number" 
-                                    min="1"
-                                    value={quantity}
-                                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                                />
-                            </div>
-                            <div className="flex items-end">
-                                <Button onClick={handleAddProduct} className="w-full">
-                                    <Plus className="mr-2 h-4 w-4" /> Add Product
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <Input 
+                                        type="number" 
+                                        min="1"
+                                        value={quantity}
+                                        onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                                        disabled={!selectedProductId}
+                                    />
+                                    <Button 
+                                        onClick={handleAddProduct} 
+                                        disabled={!selectedProductId}
+                                        className="whitespace-nowrap"
+                                    >
+                                        <Plus className="mr-2 h-4 w-4" /> Add
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
