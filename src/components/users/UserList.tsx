@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import config from '@/config';
@@ -29,8 +30,21 @@ export const UserList = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get<User[]>(config.apiURL + '/users/');
-            setUsers(response.data);
+            const response = await axios.get(config.apiURL + '/users/');
+            
+            // Explicitly type and validate each user object from the response
+            const typedUsers: User[] = Array.isArray(response.data) 
+                ? response.data.map((item: any) => ({
+                    id: item.id || '',
+                    name: item.name || '',
+                    email: item.email || '',
+                    age: typeof item.age === 'number' ? item.age : 0,
+                    status: item.status || 'Active',
+                    avatar: item.avatar
+                  }))
+                : [];
+            
+            setUsers(typedUsers);
         } catch (error) {
             console.error('Error fetching users:', error);
         }
