@@ -33,28 +33,31 @@ export const UserList = () => {
             const response = await axios.get(config.apiURL + '/users/');
             
             if (Array.isArray(response.data)) {
-                // First, explicitly define the type for the mapped array
-                const typedUsers = response.data.map((item: any): User => {
-                    // Return a properly typed User object for each item
-                    return {
-                        id: item.id || '',
-                        name: item.name || '',
-                        email: item.email || '',
+                // Type guard - make sure each item has the required properties for a User
+                const validUsers: User[] = [];
+                
+                for (const item of response.data) {
+                    // Validate each item and convert to User type
+                    const user: User = {
+                        id: typeof item.id === 'string' ? item.id : '',
+                        name: typeof item.name === 'string' ? item.name : '',
+                        email: typeof item.email === 'string' ? item.email : '',
                         age: typeof item.age === 'number' ? item.age : 0,
-                        status: item.status || 'Active',
+                        status: typeof item.status === 'string' ? item.status : 'Active',
                         avatar: item.avatar
                     };
-                });
+                    validUsers.push(user);
+                }
                 
-                // Now set the state with the properly typed array
-                setUsers(typedUsers);
+                // Set state with the explicitly typed array
+                setUsers(validUsers);
             } else {
                 console.error('Expected array of users but got:', response.data);
-                setUsers([] as User[]); // Explicit type assertion
+                setUsers([]);
             }
         } catch (error) {
             console.error('Error fetching users:', error);
-            setUsers([] as User[]); // Explicit type assertion
+            setUsers([]);
         }
     };
 
