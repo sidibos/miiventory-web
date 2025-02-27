@@ -50,6 +50,7 @@ const AddPurchaseOrder = () => {
     const [selectedProductId, setSelectedProductId] = useState<string>('');
     const [quantity, setQuantity] = useState<number>(1);
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
+    const [open, setOpen] = useState(false); // Add state to control date picker popup
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -191,7 +192,7 @@ const AddPurchaseOrder = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Order Date</Label>
-                            <Popover>
+                            <Popover open={open} onOpenChange={setOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
                                         variant={"outline"}
@@ -208,7 +209,12 @@ const AddPurchaseOrder = () => {
                                     <Calendar
                                         mode="single"
                                         selected={date}
-                                        onSelect={(newDate) => newDate && setDate(newDate)}
+                                        onSelect={(newDate) => {
+                                            if (newDate) {
+                                                setDate(newDate);
+                                                setOpen(false); // Close the popover when date is selected
+                                            }
+                                        }}
                                         initialFocus
                                     />
                                 </PopoverContent>
