@@ -33,25 +33,28 @@ export const UserList = () => {
             const response = await axios.get(config.apiURL + '/users/');
             
             if (Array.isArray(response.data)) {
-                // Create a properly typed array by mapping each item to ensure it conforms to the User type
-                const typedUsers: User[] = response.data.map((item: any) => ({
-                    id: item.id || '',
-                    name: item.name || '',
-                    email: item.email || '',
-                    age: typeof item.age === 'number' ? item.age : 0,
-                    status: item.status || 'Active',
-                    avatar: item.avatar
-                }));
+                // First, explicitly define the type for the mapped array
+                const typedUsers = response.data.map((item: any): User => {
+                    // Return a properly typed User object for each item
+                    return {
+                        id: item.id || '',
+                        name: item.name || '',
+                        email: item.email || '',
+                        age: typeof item.age === 'number' ? item.age : 0,
+                        status: item.status || 'Active',
+                        avatar: item.avatar
+                    };
+                });
                 
-                // Now we can safely set the state with our properly typed array
+                // Now set the state with the properly typed array
                 setUsers(typedUsers);
             } else {
                 console.error('Expected array of users but got:', response.data);
-                setUsers([]);
+                setUsers([] as User[]); // Explicit type assertion
             }
         } catch (error) {
             console.error('Error fetching users:', error);
-            setUsers([]);
+            setUsers([] as User[]); // Explicit type assertion
         }
     };
 
