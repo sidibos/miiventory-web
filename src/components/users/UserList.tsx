@@ -32,19 +32,21 @@ export const UserList = () => {
         try {
             const response = await axios.get(config.apiURL + '/users/');
             
-            // Explicitly type and validate each user object from the response
-            const typedUsers: User[] = Array.isArray(response.data) 
-                ? response.data.map((item: any) => ({
+            // Ensure the response data is properly typed before setting it to state
+            if (Array.isArray(response.data)) {
+                const typedUsers: User[] = response.data.map((item: any): User => ({
                     id: item.id || '',
                     name: item.name || '',
                     email: item.email || '',
                     age: typeof item.age === 'number' ? item.age : 0,
                     status: item.status || 'Active',
                     avatar: item.avatar
-                  }))
-                : [];
-            
-            setUsers(typedUsers);
+                }));
+                setUsers(typedUsers);
+            } else {
+                console.error('Expected array of users but got:', response.data);
+                setUsers([]);
+            }
         } catch (error) {
             console.error('Error fetching users:', error);
         }

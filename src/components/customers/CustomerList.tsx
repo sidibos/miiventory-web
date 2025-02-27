@@ -35,7 +35,7 @@ interface Customer {
     address: string;
     company_name: string;
     status: 'active' | 'inactive';
-    //avatar?: string;
+    avatar?: string;
 }
 
 const defaultCustomer: Customer = {
