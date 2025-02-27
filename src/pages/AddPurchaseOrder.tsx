@@ -50,7 +50,7 @@ const AddPurchaseOrder = () => {
     const [selectedProductId, setSelectedProductId] = useState<string>('');
     const [quantity, setQuantity] = useState<number>(1);
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
-    const [open, setOpen] = useState(false); // Add state to control date picker popup
+    const [open, setOpen] = useState(false); // State to control date picker popup
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -112,7 +112,7 @@ const AddPurchaseOrder = () => {
         if (!selectedProductId || !selectedSupplierId || quantity <= 0) {
             toast({
                 title: "Error",
-                description: "Please select a product, supplier and valid quantity",
+                description: "Please select a product and valid quantity",
                 variant: "destructive",
             });
             return;
@@ -220,26 +220,27 @@ const AddPurchaseOrder = () => {
                                 </PopoverContent>
                             </Popover>
                         </div>
+                        
+                        <div className="space-y-2">
+                            <Label>Supplier</Label>
+                            <Select value={selectedSupplierId} onValueChange={handleSupplierChange}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select supplier" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {suppliers.map((supplier) => (
+                                        <SelectItem key={supplier.id} value={supplier.id}>
+                                            {supplier.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <div className="border-t pt-6">
                         <h3 className="text-lg font-medium mb-4">Add Products</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <Label>Supplier</Label>
-                                <Select value={selectedSupplierId} onValueChange={handleSupplierChange}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select supplier" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {suppliers.map((supplier) => (
-                                            <SelectItem key={supplier.id} value={supplier.id}>
-                                                {supplier.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <Label>Product</Label>
                                 <Select 
