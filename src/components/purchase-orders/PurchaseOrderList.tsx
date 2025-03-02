@@ -36,8 +36,8 @@ interface PurchaseOrder {
     order_number: string;
     customer_id: string;
     total_amount: number;
-    status: 'pending' | 'processing' | 'completed' | 'cancelled';
-    order_date: string;
+    order_status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    order_due_date: string;
     shipping_address: string;
     notes?: string;
 }
@@ -49,8 +49,8 @@ const defaultPurchaseOrder: PurchaseOrder = {
     order_number: '',
     customer_id: '',
     total_amount: 0,
-    status: 'pending',
-    order_date: new Date().toISOString().split('T')[0],
+    order_status: 'pending',
+    order_due_date: new Date().toISOString().split('T')[0],
     shipping_address: '',
     notes: ''
 };
@@ -134,7 +134,7 @@ export const PurchaseOrderList = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Order ID</TableHead>
-                            <TableHead>Date</TableHead>
+                            <TableHead>Due Date</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Total Amount</TableHead>
                             <TableHead>Actions</TableHead>
@@ -144,8 +144,8 @@ export const PurchaseOrderList = () => {
                         {purchaseOrders.map((order: PurchaseOrder) => (
                             <TableRow key={order.id}>
                                 <TableCell>{order.id}</TableCell>
-                                <TableCell>{new Date(order.order_date).toLocaleDateString()}</TableCell>
-                                <TableCell className="capitalize">{order.status}</TableCell>
+                                <TableCell>{new Date(order.order_due_date).toLocaleDateString()}</TableCell>
+                                <TableCell className="capitalize">{order.order_status}</TableCell>
                                 <TableCell>${order.total_amount.toFixed(2)}</TableCell>
                                 <TableCell className="flex space-x-2">
                                     <Button variant="ghost" size="sm" onClick={() => navigate(`/purchase-orders/${order.id}`)}>

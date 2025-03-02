@@ -40,8 +40,15 @@ interface SelectedProduct extends Product {
     supplier_id: string;
 }
 
+const statusOptions = [
+    { value: 'pending', label: 'Pending' },
+    { value: 'processing', label: 'Processing' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'cancelled', label: 'Cancelled' }
+];
+
 const AddPurchaseOrder = () => {
-    const [date, setDate] = useState<Date>(new Date());
+    const [dueDate, setDueDate] = useState<Date>(new Date());
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoadingProducts, setIsLoadingProducts] = useState(false);
@@ -50,6 +57,8 @@ const AddPurchaseOrder = () => {
     const [quantity, setQuantity] = useState<number>(1);
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
     const [open, setOpen] = useState(false); // State to control date picker popup
+    const [orderStatus, setOrderStatus] = useState<string>('pending');
+    const [vat, setVat] = useState<number>(0);
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -73,10 +82,10 @@ const AddPurchaseOrder = () => {
         setIsLoadingProducts(true);
         try {
             const response = await axios.get<{ data: Product[], total: number }>(
-                `${config.apiURL}/products/supplier/${supplierId}${config.slash}`
+                `${config.apiURL}/suppliers/${supplierId}/products${config.slash}`
             );
             setProducts(response.data.data);
-            setSelectedProductId(''); // Reset selected product when supplier changes
+            //setSelectedProductId(''); // Reset selected product when supplier changes
         } catch (error) {
             console.error('Error fetching products for supplier:', error);
             toast({
@@ -136,6 +145,24 @@ const AddPurchaseOrder = () => {
         setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
     };
 
+    const calculateSubtotal = () => {
+        return selectedProducts.reduce((sum, product) => 
+            sum + (product.price * product.quantity), 0
+        );
+    };
+
+    const calculateVatAmount = () => {
+        return calculateSubtotal() * (vat / 100);
+    };
+
+    const calculateTotal = () => {
+        return calculateSubtotal() + calculateVatAmount();
+    };
+
+    const calculateTotalItems = () => {
+        return selectedProducts.reduce((sum, product) => sum + product.quantity, 0);
+    };
+
     const handleSubmit = async () => {
         if (selectedProducts.length === 0) {
             toast({
@@ -147,16 +174,18 @@ const AddPurchaseOrder = () => {
         }
 
         const orderData = {
-            order_date: date.toISOString(),
+            order_due_date: dueDate.toISOString(),
+            order_status: orderStatus,
+            vat: vat,
             products: selectedProducts.map(product => ({
                 product_id: product.id,
                 supplier_id: product.supplier_id,
                 quantity: product.quantity,
                 price: product.price
             })),
-            total_amount: selectedProducts.reduce((sum, product) => 
-                sum + (product.price * product.quantity), 0
-            ),
+            sub_total: calculateSubtotal(),
+            total_amount: calculateTotal(),
+            total_items: calculateTotalItems(),
         };
 
         try {
@@ -190,27 +219,27 @@ const AddPurchaseOrder = () => {
                 <div className="space-y-6 bg-white p-6 rounded-lg shadow">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label>Order Date</Label>
+                            <Label>Order Due Date</Label>
                             <Popover open={open} onOpenChange={setOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
                                         variant={"outline"}
                                         className={cn(
                                             "w-full justify-start text-left font-normal",
-                                            !date && "text-muted-foreground"
+                                            !dueDate && "text-muted-foreground"
                                         )}
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                        {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0">
                                     <Calendar
                                         mode="single"
-                                        selected={date}
+                                        selected={dueDate}
                                         onSelect={(newDate) => {
                                             if (newDate) {
-                                                setDate(newDate);
+                                                setDueDate(newDate);
                                                 setOpen(false); // Close the popover when date is selected
                                             }
                                         }}
@@ -234,6 +263,34 @@ const AddPurchaseOrder = () => {
                                     ))}
                                 </SelectContent>
                             </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Order Status</Label>
+                            <Select value={orderStatus} onValueChange={setOrderStatus}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select order status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {statusOptions.map((statusOption) => (
+                                        <SelectItem key={statusOption.value} value={statusOption.value}>
+                                            {statusOption.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>VAT (%)</Label>
+                            <Input 
+                                type="number" 
+                                min="0"
+                                step="0.1"
+                                value={vat}
+                                onChange={(e) => setVat(parseFloat(e.target.value) || 0)}
+                                placeholder="Enter VAT percentage"
+                            />
                         </div>
                     </div>
 
@@ -319,15 +376,28 @@ const AddPurchaseOrder = () => {
                                     );
                                 })}
                             </div>
-                            <div className="flex justify-between items-center pt-4 border-t">
-                                <div className="text-lg font-medium">
-                                    Total: ${selectedProducts.reduce((sum, product) => 
-                                        sum + (product.price * product.quantity), 0
-                                    ).toFixed(2)}
+                            <div className="flex flex-col pt-4 border-t space-y-2">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span>Subtotal:</span>
+                                    <span>${calculateSubtotal().toFixed(2)}</span>
                                 </div>
-                                <Button onClick={handleSubmit}>
-                                    Create Purchase Order
-                                </Button>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span>VAT ({vat}%):</span>
+                                    <span>${calculateVatAmount().toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span>Total Items:</span>
+                                    <span>{calculateTotalItems()}</span>
+                                </div>
+                                <div className="flex justify-between items-center pt-2 border-t text-lg font-medium">
+                                    <span>Total Amount:</span>
+                                    <span>${calculateTotal().toFixed(2)}</span>
+                                </div>
+                                <div className="pt-4 flex justify-end">
+                                    <Button onClick={handleSubmit}>
+                                        Create Purchase Order
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     )}

@@ -8,6 +8,7 @@ import {
   List,
   LogOut
 } from "lucide-react";
+
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -61,6 +62,50 @@ export const Header = () => {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>
+                    <List className="mr-2 h-4 w-4" />
+                    Orders
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-1 lg:w-[300px]">
+                      <li>
+                        <Link
+                          to="/sales-orders"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Sales Orders</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Manage sales orders
+                          </p>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/purchase-orders"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Purchase Orders</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Manage purchase orders
+                          </p>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/transfer-orders"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Transfer Orders</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Manage transfer orders
+                          </p>
+                        </Link>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>
                     <Boxes className="mr-2 h-4 w-4" />
                     Inventory
                   </NavigationMenuTrigger>
@@ -102,6 +147,17 @@ export const Header = () => {
                           </p>
                         </Link>
                       </li>
+                      <li>
+                        <Link
+                          to="/stock-level"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">Stock Level</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Stock Level
+                          </p>
+                        </Link>
+                      </li>
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
@@ -118,39 +174,6 @@ export const Header = () => {
                     <Settings className="mr-2 h-4 w-4" />
                     Customers
                   </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>
-                    <List className="mr-2 h-4 w-4" />
-                    Orders
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-1 lg:w-[300px]">
-                      <li>
-                        <Link
-                          to="/sales-orders"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Sales Orders</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Manage sales orders
-                          </p>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/purchase-orders"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Purchase Orders</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Manage purchase orders
-                          </p>
-                        </Link>
-                      </li>
-                    </ul>
-                  </NavigationMenuContent>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>

@@ -30,9 +30,7 @@ export const CategorySupplierFields = ({
 
 
     const handleCategoryChange = (value: string) => {
-        console.log('Category changed to:', value);
         onChange({ category: value });
-        console.log('prd cat: ' + value);
         setSelectedCategory(categories.find(c => parseInt(c.id) === parseInt(value)));
     };
 
