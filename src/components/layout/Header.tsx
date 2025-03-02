@@ -121,12 +121,12 @@ export const Header = () => {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger>
+                  <NavigationMenuTrigger className="flex items-center">
                     <List className="mr-2 h-4 w-4" />
                     Orders
                   </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-1 lg:w-[300px]">
+                  <NavigationMenuContent className="z-50 bg-background">
+                    <ul className="grid w-[250px] gap-3 p-4 md:w-[300px] md:grid-cols-1">
                       <li>
                         <Link
                           to="/sales-orders"
